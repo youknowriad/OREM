@@ -1,0 +1,27 @@
+{
+    "name": "rizeway/orem",
+    "version": "0.1",
+    "description": "Rizeway OREM is a Restful API Abstraction Layer. It is to Restful APIs what doctrine is for databases.",
+    "keywords": ["rest", "php", "ORM", "API"],
+    "autoload": {
+        "psr-0": {
+            "Rizeway\\OREM": "src/"
+        }
+    },
+    "require": {
+        "php":                      ">=5.3.2",
+        "symfony/yaml":             "2.*",
+        "guzzle/guzzle":            "3.3.*"
+    },
+    "require-dev": {
+        "atoum/atoum": "dev-master"
+    },
+    "config": {
+        "bin-dir": "bin"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.1.x-dev"
+        }
+    }
+}
