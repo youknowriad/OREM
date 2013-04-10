@@ -19,7 +19,8 @@ DELETE /status/1 # Delete the status of id 1
 ```
 
 1- Create a folder to store your mappings.
-2- Create a mapping file in this folder. The mapping file sould be named status.orem.yml and will look like this
+
+2- Create a mapping file in this folder. The mapping file sould be named status.orem.yml and will look like this.
 
 ```yaml
 class: MyNamespace/Status
@@ -98,7 +99,6 @@ $manager = $factory->getManager();
 $status = new \MyNamespace\Status();
 $status->setMessage('my message');
 $status->setAuthor('author');
-$status->setCountLikes(10);
 
 $manager->persist($status); // Call POST API
 
