@@ -76,6 +76,7 @@ class Manager extends atoum\test
     {
         $this
             ->if($connection = new \mock\Rizeway\OREM\Connection\ConnectionInterface())
+             ->and($connection->getMockController()->query = array('test' => 'tata'))
             ->and($mappingField = new MappingFieldString('test'))
             ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', array('test' => $mappingField), 'test'))
             ->and($object = new TestedClass($connection, array('entity' => $mapping)))
@@ -86,6 +87,7 @@ class Manager extends atoum\test
                 ->mock($connection)
                     ->call('query')
                     ->withArguments('POST', 'entity', array('test' => 'toto'))
+                ->string($entity->test)->isEqualTo('tata')
         ;
     }
 

@@ -53,11 +53,12 @@ class Manager
     public function persist($object)
     {
         $mapping = $this->getMappingForObject($object);
-        $this->connection->query(
+        $result = $this->connection->query(
             ConnectionInterface::METHOD_POST,
             $mapping->getResourceUrl(),
             $this->serializer->serializeEntity($object, $mapping->getName())
         );
+        $this->serializer->updateEntity($object, $result, $mapping->getName());
     }
 
     /**
