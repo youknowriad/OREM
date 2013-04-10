@@ -139,10 +139,9 @@ Contribute
 Install the dependancies using composer and your ready to go
 
 ```
-git clone https://github.com/youknowriad/anchour.git && cd anchour
+git clone https://github.com/youknowriad/OREM.git && cd OREM
 curl -s http://getcomposer.org/installer | php
 ./composer.phar install --dev
-
 ```
 
 Tests
