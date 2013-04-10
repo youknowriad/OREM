@@ -1,6 +1,8 @@
 <?php
 
-namespace Rizeway\OREM\Mapping;
+namespace Rizeway\OREM\Mapping\field;
+
+use Rizeway\OREM\Mapping\MappingInterface;
 
 class MappingField implements MappingInterface
 {

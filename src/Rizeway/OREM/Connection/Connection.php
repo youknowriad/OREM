@@ -4,6 +4,9 @@ namespace Rizeway\OREM\Connection;
 
 class Connection implements ConnectionInterface
 {
+    /**
+     * @var \Guzzle\Service\Client
+     */
     protected $client;
 
     /**
@@ -17,13 +20,14 @@ class Connection implements ConnectionInterface
     /**
      * @param string $method
      * @param string $resource
+     * @param array  $content
      * @return array|bool|float|int|string
      */
-    public function query($method, $resource)
+    public function query($method, $resource, $content = null)
     {
         $request = $this->client->createRequest($method, $resource, array(
             'Content-Type' => 'application/json'
-        ));
+        ), is_null($content) ? null : json_encode($content));
 
         return $request->send()->json();
     }

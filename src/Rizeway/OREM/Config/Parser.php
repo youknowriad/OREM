@@ -3,7 +3,6 @@
 namespace Rizeway\OREM\Config;
 
 use Rizeway\OREM\Mapping\MappingEntity;
-use Rizeway\OREM\Mapping\MappingField;
 
 class Parser
 {
@@ -21,7 +20,12 @@ class Parser
             $primaryKey = null;
             foreach ($entityConfiguration['fields'] as $fieldname => $fieldConfiguration) {
                 $primaryKey = isset($fieldConfiguration['primary_key']) && $fieldConfiguration['primary_key'] ? $name : $primaryKey;
-                $fieldmappings[] = new MappingField($fieldname, isset($fieldConfiguration['remote']) ? $fieldConfiguration['remote'] : null);
+                $type = isset($fieldConfiguration['type']) ? $fieldConfiguration['type'] : 'string';
+                $classname = '\Rizeway\OREM\Mapping\Field\MappingField'.ucfirst($type);
+                if (!class_exists($classname)) {
+                    throw new \Exception('Invalid field type '.$type);
+                }
+                $fieldmappings[] = new $classname($fieldname, isset($fieldConfiguration['remote']) ? $fieldConfiguration['remote'] : null);
             }
 
             if (!class_exists($class)) {

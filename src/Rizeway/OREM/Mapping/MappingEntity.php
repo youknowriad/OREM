@@ -70,4 +70,12 @@ class MappingEntity
     {
         return $this->primaryKey;
     }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
 }

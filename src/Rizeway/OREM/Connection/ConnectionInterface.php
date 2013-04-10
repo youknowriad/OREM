@@ -12,7 +12,8 @@ interface ConnectionInterface
     /**
      * @param string $method
      * @param string $resource
+     * @param array  $content
      * @return array|bool|float|int|string
      */
-    public function query($method, $resource);
+    public function query($method, $resource, $content = null);
 }
