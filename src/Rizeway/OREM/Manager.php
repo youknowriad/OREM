@@ -42,9 +42,7 @@ class Manager
      */
     public function getRepository($entityName)
     {
-        if (!isset($this->mappings[$entityName])) {
-            throw new \Exception('Unknown Entity : '.$entityName);
-        }
+        $this->getMappingForEntity($entityName);
 
         return new Repository($this, $entityName);
     }
@@ -68,10 +66,9 @@ class Manager
     public function update($object)
     {
         $mapping = $this->getMappingForObject($object);
-        $method = 'get'.ucfirst($mapping->getPrimaryKey());
         $result = $this->connection->query(
             ConnectionInterface::METHOD_PUT,
-            $mapping->getResourceUrl().'/'.$object->$method(),
+            $mapping->getResourceUrl().'/'.$this->getPropertyValue($object, $mapping->getPrimaryKey()),
             $this->serializer->serializeEntity($object, $mapping->getName())
         );
 
@@ -85,14 +82,11 @@ class Manager
      */
     public function findAll($entityName)
     {
-        if (!isset($this->mappings[$entityName])) {
-            throw new \Exception('Unknown Entity : '.$entityName);
-        }
-
-        $results = $this->connection->query(ConnectionInterface::METHOD_GET, $this->mappings[$entityName]->getResourceUrl());
+        $mapping = $this->getMappingForEntity($entityName);
+        $results = $this->connection->query(ConnectionInterface::METHOD_GET, $mapping->getResourceUrl());
         $entities = array();
         foreach ($results as $result) {
-            $entities[] = $this->serializer->unserializeEntity($result, $this->mappings[$entityName]->getName());
+            $entities[] = $this->serializer->unserializeEntity($result, $mapping->getName());
         }
 
         return $entities;
@@ -106,17 +100,29 @@ class Manager
      */
     public function find($entityName, $primaryKeyValue)
     {
-        if (!isset($this->mappings[$entityName])) {
-            throw new \Exception('Unknown Entity : '.$entityName);
-        }
+        $mapping = $this->getMappingForEntity($entityName);
 
         try {
-            $result = $this->connection->query(ConnectionInterface::METHOD_GET, $this->mappings[$entityName]->getResourceUrl().'/'.$primaryKeyValue);
+            $result = $this->connection->query(ConnectionInterface::METHOD_GET, $mapping->getResourceUrl().'/'.$primaryKeyValue);
 
-            return $this->serializer->unserializeEntity($result, $this->mappings[$entityName]->getName());
+            return $this->serializer->unserializeEntity($result, $mapping->getName());
         } catch(ExceptionNotFound $e) {
             return null;
         }
+    }
+
+    /**
+     * @param $entityName
+     * @return Mapping\MappingEntity
+     * @throws \Exception
+     */
+    protected function getMappingForEntity($entityName)
+    {
+        if (!isset($this->mappings[$entityName])) {
+            throw new \Exception('Unknown Entity : ' . $entityName);
+        }
+
+        return $this->mappings[$entityName];
     }
 
     /**
@@ -126,10 +132,8 @@ class Manager
     public function remove($object)
     {
         $mapping = $this->getMappingForObject($object);
-        $method = 'get'.ucfirst($mapping->getPrimaryKey());
-        $primaryKeyValue = $object->$method();
-
-        $this->connection->query(ConnectionInterface::METHOD_DELETE, $mapping->getResourceUrl().'/'.$primaryKeyValue);
+        $this->connection->query(ConnectionInterface::METHOD_DELETE, $mapping->getResourceUrl().'/'.
+            $this->getPropertyValue($object, $mapping->getPrimaryKey()));
     }
 
     /**
@@ -148,11 +152,23 @@ class Manager
         throw new \Exception('No Mapping Entity found for class : '. get_class($object));
     }
 
+    protected function getPropertyValue($object, $property)
+    {
+        $reflection = new \ReflectionProperty($object, $property);
+        if ($reflection->isPublic()) {
+            return $object->$property;
+        } else {
+            $method = 'get'.ucfirst($this->camelize($property));
+
+            return $object->$method();
+        }
+    }
+
     /**
      * @param $string
      * @return mixed
      */
-    public static function camelize($string)
+    protected function camelize($string)
     {
         return preg_replace_callback('/(^|_|\.)+(.)/', function ($match) { return ('.' === $match[1] ? '_' : '').strtoupper($match[2]); }, $string);
     }

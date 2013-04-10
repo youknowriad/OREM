@@ -42,6 +42,7 @@ class Factory
                 throw new ExceptionNotFound($event['response']->getMessage(), $event['response']->getStatusCode());
             }
         });
+
         return new Connection($client);
     }
 

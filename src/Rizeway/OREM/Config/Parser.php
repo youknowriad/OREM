@@ -33,7 +33,7 @@ class Parser
             }
 
             if (is_null($primaryKey)) {
-                throw new \Exception('A field must be defined as primary key '.$primaryKey);
+                throw new \Exception('A field must be defined as primary key');
             }
 
             $mappings[$name] = new MappingEntity($name, $class, $fieldmappings, $primaryKey);

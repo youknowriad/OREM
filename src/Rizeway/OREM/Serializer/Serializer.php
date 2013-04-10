@@ -25,10 +25,8 @@ class Serializer
      */
     public function unserializeEntity(array $serial, $name)
     {
-        if (!isset($this->mappings[$name])) {
-            throw new \Exception('Undefined Entity "'.$name.'"');
-        }
-        $classname = $this->mappings[$name]->getClassname();
+        $mapping = $this->getMappingForEntity($name);
+        $classname = $mapping->getClassname();
         $object = unserialize(sprintf('O:%d:"%s":0:{}', strlen($classname), $classname));
         $this->updateEntity($object, $serial, $name);
 
@@ -43,13 +41,10 @@ class Serializer
      */
     public function serializeEntity($object, $name)
     {
-        if (!isset($this->mappings[$name])) {
-            throw new \Exception('Undefined Entity "'.$name.'"');
-        }
-
+        $mapping = $this->getMappingForEntity($name);
         $serial = array();
         $refelct = new \ReflectionClass($object);
-        foreach ($this->mappings[$name]->getMappings() as $fieldMapping) {
+        foreach ($mapping->getMappings() as $fieldMapping) {
             $property = $refelct->getProperty($fieldMapping->getFieldName());
             $accessible = $property->isPublic();
             $property->setAccessible(true);
@@ -68,12 +63,9 @@ class Serializer
      */
     public function updateEntity($object, $serial, $name)
     {
-        if (!isset($this->mappings[$name])) {
-            throw new \Exception('Undefined Entity "'.$name.'"');
-        }
-
+        $mapping = $this->getMappingForEntity($name);
         $refelct = new \ReflectionClass($object);
-        foreach ($this->mappings[$name]->getMappings() as $fieldMapping) {
+        foreach ($mapping->getMappings() as $fieldMapping) {
             if (isset($serial[$fieldMapping->getRemoteName()])) {
                 $property = $refelct->getProperty($fieldMapping->getFieldName());
                 $accessible = $property->isPublic();
@@ -82,5 +74,19 @@ class Serializer
                 $property->setAccessible($accessible);
             }
         }
+    }
+
+    /**
+     * @param $entityName
+     * @return \Rizeway\OREM\Mapping\MappingEntity
+     * @throws \Exception
+     */
+    protected function getMappingForEntity($entityName)
+    {
+        if (!isset($this->mappings[$entityName])) {
+            throw new \Exception('Unknown Entity : ' . $entityName);
+        }
+
+        return $this->mappings[$entityName];
     }
 }

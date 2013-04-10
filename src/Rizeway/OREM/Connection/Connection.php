@@ -18,6 +18,14 @@ class Connection implements ConnectionInterface
     }
 
     /**
+     * @return \Guzzle\Service\Client
+     */
+    public function getClient()
+    {
+        return $this->client;
+    }
+
+    /**
      * @param string $method
      * @param string $resource
      * @param array  $content

@@ -1,6 +1,6 @@
 <?php
 
-namespace Rizeway\OREM\Mapping\field;
+namespace Rizeway\OREM\Mapping\Field;
 
 use Rizeway\OREM\Mapping\MappingInterface;
 
