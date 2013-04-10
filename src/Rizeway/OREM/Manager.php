@@ -63,6 +63,22 @@ class Manager
     }
 
     /**
+     * @param $object
+     */
+    public function update($object)
+    {
+        $mapping = $this->getMappingForObject($object);
+        $method = 'get'.ucfirst($mapping->getPrimaryKey());
+        $result = $this->connection->query(
+            ConnectionInterface::METHOD_PUT,
+            $mapping->getResourceUrl().'/'.$object->$method(),
+            $this->serializer->serializeEntity($object, $mapping->getName())
+        );
+
+        $this->serializer->updateEntity($object, $result, $mapping->getName());
+    }
+
+    /**
      * @param string $entityName
      * @return object[]
      * @throws \Exception
@@ -101,6 +117,19 @@ class Manager
         } catch(ExceptionNotFound $e) {
             return null;
         }
+    }
+
+    /**
+     * @param object $object
+     * @throws \Exception
+     */
+    public function remove($object)
+    {
+        $mapping = $this->getMappingForObject($object);
+        $method = 'get'.ucfirst($mapping->getPrimaryKey());
+        $primaryKeyValue = $object->$method();
+
+        $this->connection->query(ConnectionInterface::METHOD_DELETE, $mapping->getResourceUrl().'/'.$primaryKeyValue);
     }
 
     /**

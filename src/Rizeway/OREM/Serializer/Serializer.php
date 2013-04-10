@@ -30,22 +30,13 @@ class Serializer
         }
         $classname = $this->mappings[$name]->getClassname();
         $object = unserialize(sprintf('O:%d:"%s":0:{}', strlen($classname), $classname));
-        $refelct = new \ReflectionClass($object);
-        foreach ($this->mappings[$name]->getMappings() as $fieldMapping) {
-            if (isset($serial[$fieldMapping->getRemoteName()])) {
-                $property = $refelct->getProperty($fieldMapping->getFieldName());
-                $accessible = $property->isPublic();
-                $property->setAccessible(true);
-                $property->setValue($object, $fieldMapping->unserializeField($serial[$fieldMapping->getRemoteName()]));
-                $property->setAccessible($accessible);
-            }
-        }
+        $this->updateEntity($object, $serial, $name);
 
         return $object;
     }
 
     /**
-     * @param $object
+     * @param object $object
      * @param string $name
      * @return array
      * @throws \Exception
@@ -67,5 +58,29 @@ class Serializer
         }
 
         return $serial;
+    }
+
+    /**
+     * @param object $object
+     * @param array  $serial
+     * @param string $name
+     * @throws \Exception
+     */
+    public function updateEntity($object, $serial, $name)
+    {
+        if (!isset($this->mappings[$name])) {
+            throw new \Exception('Undefined Entity "'.$name.'"');
+        }
+
+        $refelct = new \ReflectionClass($object);
+        foreach ($this->mappings[$name]->getMappings() as $fieldMapping) {
+            if (isset($serial[$fieldMapping->getRemoteName()])) {
+                $property = $refelct->getProperty($fieldMapping->getFieldName());
+                $accessible = $property->isPublic();
+                $property->setAccessible(true);
+                $property->setValue($object, $fieldMapping->unserializeField($serial[$fieldMapping->getRemoteName()]));
+                $property->setAccessible($accessible);
+            }
+        }
     }
 }

@@ -19,7 +19,7 @@ class Parser
             $fieldmappings = array();
             $primaryKey = null;
             foreach ($entityConfiguration['fields'] as $fieldname => $fieldConfiguration) {
-                $primaryKey = isset($fieldConfiguration['primary_key']) && $fieldConfiguration['primary_key'] ? $name : $primaryKey;
+                $primaryKey = isset($fieldConfiguration['primary_key']) && $fieldConfiguration['primary_key'] ? $fieldname : $primaryKey;
                 $type = isset($fieldConfiguration['type']) ? $fieldConfiguration['type'] : 'string';
                 $classname = '\Rizeway\OREM\Mapping\Field\MappingField'.ucfirst($type);
                 if (!class_exists($classname)) {
