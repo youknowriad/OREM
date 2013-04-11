@@ -2,6 +2,9 @@
 
 namespace Rizeway\OREM\Serializer;
 
+use Rizeway\OREM\Entity\EntityHelper;
+use Rizeway\OREM\Store\Store;
+
 class Serializer
 {
     /**
@@ -10,25 +13,37 @@ class Serializer
     protected $mappings;
 
     /**
-     * @param \Rizeway\OREM\Mapping\MappingEntity[] $mappings
+     * @var \Rizeway\OREM\Store\Store
      */
-    public function __construct($mappings)
+    protected $store;
+
+    /**
+     * @param \Rizeway\OREM\Mapping\MappingEntity[] $mappings
+     * @param Store $store
+     */
+    public function __construct($mappings, Store $store)
     {
         $this->mappings = $mappings;
+        $this->store    = $store;
     }
 
     /**
      * @param array $serial
      * @param string $name
      * @return object
-     * @throws \Exception
      */
     public function unserializeEntity(array $serial, $name)
     {
         $mapping = $this->getMappingForEntity($name);
-        $classname = $mapping->getClassname();
-        $object = unserialize(sprintf('O:%d:"%s":0:{}', strlen($classname), $classname));
-        $this->updateEntity($object, $serial, $name);
+        $primaryKey = $serial[$mapping->getRemotePrimaryKey()];
+        if ($this->store->hasEntity($name, $primaryKey)) {
+            $object = $this->store->getEntity($name, $primaryKey);
+            $this->updateEntity($object, $serial, $name);
+        } else {
+            $object = $this->constructEntity($name);
+            $this->updateEntity($object, $serial, $name);
+            $this->store->addEntity($object);
+        }
 
         return $object;
     }
@@ -42,38 +57,80 @@ class Serializer
     public function serializeEntity($object, $name)
     {
         $mapping = $this->getMappingForEntity($name);
+        $helper = new EntityHelper($mapping);
         $serial = array();
-        $refelct = new \ReflectionClass($object);
-        foreach ($mapping->getMappings() as $fieldMapping) {
-            $property = $refelct->getProperty($fieldMapping->getFieldName());
-            $accessible = $property->isPublic();
-            $property->setAccessible(true);
-            $serial[$fieldMapping->getRemoteName()] = $fieldMapping->serializeField($property->getValue($object));
-            $property->setAccessible($accessible);
+
+        foreach ($mapping->getFieldMappings() as $fieldMapping) {
+            $serial[$fieldMapping->getRemoteName()] = $helper->getPropertyValue($object, $fieldMapping->getFieldName());
+        }
+
+        foreach ($mapping->getHasManyMappings() as $relationMapping) {
+            $propertyValue = $helper->getPropertyValue($object, $relationMapping->getFieldName());
+            $serial[$relationMapping->getRemoteName()] = null;
+            if (!is_null($propertyValue)) {
+                $serial[$relationMapping->getRemoteName()] =  array();
+                foreach ($propertyValue as $subEntity) {
+                    $serial[$relationMapping->getRemoteName()][] = $this->serializeEntity($subEntity,
+                        $relationMapping->getEntityName());
+                }
+            }
+        }
+
+        foreach ($mapping->getHasOneMappings() as $relationMapping) {
+            $propertyValue = $helper->getPropertyValue($object, $relationMapping->getFieldName());
+            $serial[$relationMapping->getRemoteName()] = is_null($propertyValue) ? null : $this->serializeEntity($propertyValue,
+                $relationMapping->getEntityName());
         }
 
         return $serial;
     }
 
     /**
-     * @param object $object
-     * @param array  $serial
-     * @param string $name
-     * @throws \Exception
+     * @param $object
+     * @param $serial
+     * @param $name
      */
     public function updateEntity($object, $serial, $name)
     {
         $mapping = $this->getMappingForEntity($name);
-        $refelct = new \ReflectionClass($object);
-        foreach ($mapping->getMappings() as $fieldMapping) {
+        $helper = new EntityHelper($mapping);
+
+        foreach ($mapping->getFieldMappings() as $fieldMapping) {
             if (isset($serial[$fieldMapping->getRemoteName()])) {
-                $property = $refelct->getProperty($fieldMapping->getFieldName());
-                $accessible = $property->isPublic();
-                $property->setAccessible(true);
-                $property->setValue($object, $fieldMapping->unserializeField($serial[$fieldMapping->getRemoteName()]));
-                $property->setAccessible($accessible);
+                $helper->setPropertyValue($object, $fieldMapping->getFieldName(),
+                    $fieldMapping->unserializeField($serial[$fieldMapping->getRemoteName()]));
             }
         }
+
+        foreach ($mapping->getHasManyMappings() as $relationMapping) {
+            if (isset($serial[$relationMapping->getRemoteName()])) {
+                $subEntities = array();
+                foreach ($serial[$relationMapping->getRemoteName()] as $subEntitySerial)
+                {
+                    $subEntities[] = $this->unserializeEntity($subEntitySerial, $relationMapping->getEntityName());
+                }
+                $helper->setPropertyValue($object, $relationMapping->getFieldName(), $subEntities);
+            }
+        }
+
+        foreach ($mapping->getHasOneMappings() as $relationMapping) {
+            if (isset($serial[$relationMapping->getRemoteName()])) {
+                $helper->setPropertyValue($object, $relationMapping->getFieldName(),
+                    $this->unserializeEntity($serial[$relationMapping->getRemoteName()], $relationMapping->getEntityName()));
+            }
+        }
+    }
+
+    /**
+     * @param string $name
+     * @return object
+     */
+    protected function constructEntity($name)
+    {
+        $mapping = $this->getMappingForEntity($name);
+        $classname = $mapping->getClassname();
+
+        return unserialize(sprintf('O:%d:"%s":0:{}', strlen($classname), $classname));
     }
 
     /**

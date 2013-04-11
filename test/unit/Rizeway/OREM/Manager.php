@@ -43,7 +43,7 @@ class Manager extends atoum\test
         $this
             ->if($connection = new \mock\Rizeway\OREM\Connection\ConnectionInterface())
             ->and($mappingField = new MappingFieldString('test'))
-            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', array('test' => $mappingField), 'test'))
+            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', 'test', array('test' => $mappingField), array()))
             ->and($object = new TestedClass($connection, array('entity' => $mapping)))
             ->then
                 ->object($object->getRepository('entity'))
@@ -61,7 +61,7 @@ class Manager extends atoum\test
                 array('test' => 'value')
             ))
             ->and($mappingField = new MappingFieldString('test'))
-            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', array('test' => $mappingField), 'test'))
+            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', 'test', array('test' => $mappingField), array()))
             ->and($object = new TestedClass($connection, array('entity' => $mapping)))
             ->then
                 ->array($result = $object->findAll('entity'))->hasSize(1)
@@ -78,7 +78,7 @@ class Manager extends atoum\test
             ->if($connection = new \mock\Rizeway\OREM\Connection\ConnectionInterface())
              ->and($connection->getMockController()->query = array('test' => 'tata'))
             ->and($mappingField = new MappingFieldString('test'))
-            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', array('test' => $mappingField), 'test'))
+            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', 'test', array('test' => $mappingField), array()))
             ->and($object = new TestedClass($connection, array('entity' => $mapping)))
             ->and($entity = new MyEntity())
             ->and($entity->test = 'toto')
@@ -97,7 +97,7 @@ class Manager extends atoum\test
             ->if($connection = new \mock\Rizeway\OREM\Connection\ConnectionInterface())
             ->and($connection->getMockController()->query = array('test' => 'tata'))
             ->and($mappingField = new MappingFieldString('test'))
-            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', array('test' => $mappingField), 'test'))
+            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', 'test', array('test' => $mappingField), array()))
             ->and($object = new TestedClass($connection, array('entity' => $mapping)))
             ->and($entity = new MyEntity())
             ->and($entity->test = 'toto')
@@ -116,7 +116,7 @@ class Manager extends atoum\test
             ->if($connection = new \mock\Rizeway\OREM\Connection\ConnectionInterface())
             ->and($connection->getMockController()->query = array('test' => 'id'))
             ->and($mappingField = new MappingFieldString('test'))
-            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', array('test' => $mappingField), 'test'))
+            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', 'test', array('test' => $mappingField), array()))
             ->and($object = new TestedClass($connection, array('entity' => $mapping)))
             ->and($entity = $object->find('entity', 'id'))
             ->then
@@ -136,7 +136,7 @@ class Manager extends atoum\test
         $this
             ->if($connection = new \mock\Rizeway\OREM\Connection\ConnectionInterface())
             ->and($mappingField = new MappingFieldString('test'))
-            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', array('test' => $mappingField), 'test'))
+            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', 'test', array('test' => $mappingField), array()))
             ->and($object = new TestedClass($connection, array('entity' => $mapping)))
             ->and($entity = new MyEntity())
             ->and($entity->test = 'toto')
@@ -149,7 +149,7 @@ class Manager extends atoum\test
                     ->hasMessage('No Mapping Entity found for class : mock\test')
 
             ->if($mappingField = new MappingFieldString('tested_value'))
-            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntityGetter', array('tested_value' => $mappingField), 'tested_value'))
+            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntityGetter', 'tested_value', array('tested_value' => $mappingField), array()))
             ->and($object = new TestedClass($connection, array('entity' => $mapping)))
             ->and($entity = new MyEntityGetter())
             ->and($entity->setTestedValue('toto'))

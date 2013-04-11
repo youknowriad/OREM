@@ -1,8 +1,17 @@
 {
     "name": "rizeway/orem",
+    "type": "library",
     "version": "0.1",
+    "license": "MIT",
     "description": "Rizeway OREM is a Restful API Abstraction Layer. It is to Restful APIs what doctrine is for databases.",
     "keywords": ["rest", "php", "ORM", "API"],
+    "authors": [
+        {
+            "name": "Riad Benguella",
+            "email": "riad@rizeway.com",
+            "homepage": "http://riadbenguella.com"
+        }
+    ],
     "autoload": {
         "psr-0": {
             "Rizeway\\OREM": "src/"

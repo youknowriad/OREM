@@ -3,6 +3,8 @@
 namespace Rizeway\OREM\Config;
 
 use Rizeway\OREM\Mapping\MappingEntity;
+use Rizeway\OREM\Mapping\Relation\MappingRelationHasMany;
+use Rizeway\OREM\Mapping\Relation\MappingRelationHasOne;
 
 class Parser
 {
@@ -15,11 +17,16 @@ class Parser
     {
         $mappings = array();
         foreach ($entitiesConfiguration as $name => $entityConfiguration) {
+
             $class = $entityConfiguration['class'];
+            if (!class_exists($class)) {
+                throw new \Exception('Invalid classname for Entity '.$name);
+            }
+
             $fieldmappings = array();
             $primaryKey = null;
             foreach ($entityConfiguration['fields'] as $fieldname => $fieldConfiguration) {
-                $primaryKey = isset($fieldConfiguration['primary_key']) && $fieldConfiguration['primary_key'] ? $fieldname : $primaryKey;
+                $primaryKey = isset($fieldConfiguration['primaryKey']) && $fieldConfiguration['primaryKey'] ? $fieldname : $primaryKey;
                 $type = isset($fieldConfiguration['type']) ? $fieldConfiguration['type'] : 'string';
                 $classname = '\Rizeway\OREM\Mapping\Field\MappingField'.ucfirst($type);
                 if (!class_exists($classname)) {
@@ -27,16 +34,27 @@ class Parser
                 }
                 $fieldmappings[] = new $classname($fieldname, isset($fieldConfiguration['remote']) ? $fieldConfiguration['remote'] : null);
             }
-
-            if (!class_exists($class)) {
-                throw new \Exception('Invalid classname for Entity '.$name);
-            }
-
             if (is_null($primaryKey)) {
                 throw new \Exception('A field must be defined as primary key');
             }
 
-            $mappings[$name] = new MappingEntity($name, $class, $fieldmappings, $primaryKey);
+            $hasManyMappings = array();
+            if (isset($entityConfiguration['hasMany'])) {
+                foreach ($entityConfiguration['hasMany'] as $fieldname => $relationConfiguration) {
+                    $hasManyMappings[] = new MappingRelationHasMany($relationConfiguration['targetEntity'],
+                        $fieldname, isset($relationConfiguration['remote']) ? $relationConfiguration['remote'] : null);
+                }
+            }
+
+            $hasOneMappings = array();
+            if (isset($entityConfiguration['hasOne'])) {
+                foreach ($entityConfiguration['hasOne'] as $fieldname => $relationConfiguration) {
+                    $hasOneMappings[] = new MappingRelationHasOne($relationConfiguration['targetEntity'],
+                        $fieldname, isset($relationConfiguration['remote']) ? $relationConfiguration['remote'] : null);
+                }
+            }
+
+            $mappings[$name] = new MappingEntity($name, $class, $primaryKey, $fieldmappings, $hasManyMappings, $hasOneMappings);
         }
 
         return $mappings;

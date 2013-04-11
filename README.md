@@ -3,7 +3,7 @@ Rizeway OREM
 
 [![Build Status](https://secure.travis-ci.org/youknowriad/OREM.png?branch=master)](http://travis-ci.org/youknowriad/OREM)
 
-Rizeway OREM is a Restful API Abstraction Layer. It is to Restful APIs what doctrine is for databases.
+Rizeway OREM is a Restful API Abstraction Layer. It is to Restful APIs what doctrine is to databases.
 
 Getting Started
 ---------------
@@ -26,7 +26,7 @@ DELETE /status/1 # Delete the status of id 1
 class: MyNamespace/Status
 fields:
     id:
-        primary_key: true
+        primaryKey: true
     message:
         type: string
     author:
@@ -99,7 +99,6 @@ $manager = $factory->getManager();
 $status = new \MyNamespace\Status();
 $status->setMessage('my message');
 $status->setAuthor('author');
-
 $manager->persist($status); // Call POST API
 
 $status->addLike();
@@ -129,14 +128,15 @@ Roadmap
 
  - Find Query Handling (GET with Url parameters)
  - Url Customisation
- - Entity Relations Mapping (HasMany, HasOne)
+ - Handling HasMany and HasOne lazy loading
+ - Handling Cascade Delete And Options to disable Cascade update
  - Custom api functions
  - More Field Types
  - Extra parameters in URL (like CAS ticket or Other auth token)
 
 Contribute
 ----------
-Install the dependancies using composer and your ready to go
+Install the dependencies using composer and you're ready to go
 
 ```
 git clone https://github.com/youknowriad/OREM.git && cd OREM

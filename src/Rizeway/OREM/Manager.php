@@ -2,10 +2,12 @@
 
 namespace Rizeway\OREM;
 
+use Rizeway\OREM\Entity\EntityHelper;
 use Rizeway\OREM\Exception\ExceptionNotFound;
 use Rizeway\OREM\Repository\Repository;
 use Rizeway\OREM\Connection\ConnectionInterface;
 use Rizeway\OREM\Serializer\Serializer;
+use Rizeway\OREM\Store\Store;
 
 class Manager
 {
@@ -25,6 +27,11 @@ class Manager
     protected $serializer;
 
     /**
+     * @var Store
+     */
+    protected $store;
+
+    /**
      * @param ConnectionInterface $connection
      * @param \Rizeway\OREM\Mapping\MappingEntity[] $mappings
      */
@@ -32,7 +39,8 @@ class Manager
     {
         $this->connection = $connection;
         $this->mappings   = $mappings;
-        $this->serializer = new Serializer($mappings);
+        $this->store      = new Store($mappings);
+        $this->serializer = new Serializer($mappings, $this->store);
     }
 
     /**
@@ -67,9 +75,10 @@ class Manager
     public function update($object)
     {
         $mapping = $this->getMappingForObject($object);
+        $helper = new EntityHelper($mapping);
         $result = $this->connection->query(
             ConnectionInterface::METHOD_PUT,
-            $mapping->getResourceUrl().'/'.$this->getPropertyValue($object, $mapping->getPrimaryKey()),
+            $mapping->getResourceUrl().'/'.$helper->getPrimaryKey($object),
             $this->serializer->serializeEntity($object, $mapping->getName())
         );
 
@@ -117,7 +126,7 @@ class Manager
      * @return Mapping\MappingEntity
      * @throws \Exception
      */
-    protected function getMappingForEntity($entityName)
+    public function getMappingForEntity($entityName)
     {
         if (!isset($this->mappings[$entityName])) {
             throw new \Exception('Unknown Entity : ' . $entityName);
@@ -133,8 +142,10 @@ class Manager
     public function remove($object)
     {
         $mapping = $this->getMappingForObject($object);
+        $helper = new EntityHelper($mapping);
         $this->connection->query(ConnectionInterface::METHOD_DELETE, $mapping->getResourceUrl().'/'.
-            $this->getPropertyValue($object, $mapping->getPrimaryKey()));
+            $helper->getPrimaryKey($object));
+        $this->store->removeEntity($object);
     }
 
     /**
@@ -142,7 +153,7 @@ class Manager
      * @return Mapping\MappingEntity
      * @throws \Exception
      */
-    protected function getMappingForObject($object)
+    public function getMappingForObject($object)
     {
         foreach ($this->mappings as $mapping) {
             if (is_a($object, $mapping->getClassname())) {
@@ -151,26 +162,5 @@ class Manager
         }
 
         throw new \Exception('No Mapping Entity found for class : '. get_class($object));
-    }
-
-    protected function getPropertyValue($object, $property)
-    {
-        $reflection = new \ReflectionProperty($object, $property);
-        if ($reflection->isPublic()) {
-            return $object->$property;
-        } else {
-            $method = 'get'.ucfirst($this->camelize($property));
-
-            return $object->$method();
-        }
-    }
-
-    /**
-     * @param $string
-     * @return mixed
-     */
-    protected function camelize($string)
-    {
-        return preg_replace_callback('/(^|_|\.)+(.)/', function ($match) { return ('.' === $match[1] ? '_' : '').strtoupper($match[2]); }, $string);
     }
 }

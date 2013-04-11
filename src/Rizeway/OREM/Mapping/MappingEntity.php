@@ -16,9 +16,19 @@ class MappingEntity
     protected $classname;
 
     /**
-     * @var MappingInterface[]
+     * @var \Rizeway\OREM\Mapping\Field\MappingFieldInterface[]
      */
-    protected $mappings;
+    protected $fieldMappings;
+
+    /**
+     * @var \Rizeway\OREM\Mapping\Relation\MappingRelationInterface[]
+     */
+    protected $hasManyMappings;
+
+    /**
+     * @var \Rizeway\OREM\Mapping\Relation\MappingRelationInterface[]
+     */
+    protected $hasOneMappings;
 
     /**
      * @var string
@@ -28,15 +38,20 @@ class MappingEntity
     /**
      * @param string $name
      * @param string $classname
-     * @param MappingInterface[] $mappings
      * @param string $primaryKey
+     * @param \Rizeway\OREM\Mapping\Field\MappingFieldInterface[] $fieldMappings
+     * @param \Rizeway\OREM\Mapping\Relation\MappingRelationInterface[] $hasManyMappings
+     * @param \Rizeway\OREM\Mapping\Relation\MappingRelationInterface[] $hasOneMappings
      */
-    public function __construct($name, $classname, $mappings, $primaryKey)
+    public function __construct($name, $classname, $primaryKey, $fieldMappings,
+        $hasManyMappings = array(), $hasOneMappings = array())
     {
-        $this->name       = $name;
-        $this->classname  = $classname;
-        $this->mappings   = $mappings;
-        $this->primaryKey = $primaryKey;
+        $this->name            = $name;
+        $this->classname       = $classname;
+        $this->primaryKey      = $primaryKey;
+        $this->fieldMappings   = $fieldMappings;
+        $this->hasManyMappings = $hasManyMappings;
+        $this->hasOneMappings  = $hasOneMappings;
     }
 
     /**
@@ -56,11 +71,27 @@ class MappingEntity
     }
 
     /**
-     * @return MappingInterface[]
+     * @return \Rizeway\OREM\Mapping\Field\MappingFieldInterface[]
      */
-    public function getMappings()
+    public function getFieldMappings()
     {
-        return $this->mappings;
+        return $this->fieldMappings;
+    }
+
+    /**
+     * @return \Rizeway\OREM\Mapping\Relation\MappingRelationInterface[]
+     */
+    public function getHasManyMappings()
+    {
+        return $this->hasManyMappings;
+    }
+
+    /**
+     * @return \Rizeway\OREM\Mapping\Relation\MappingRelationInterface[]
+     */
+    public function getHasOneMappings()
+    {
+        return $this->hasOneMappings;
     }
 
     /**
@@ -69,6 +100,17 @@ class MappingEntity
     public function getPrimaryKey()
     {
         return $this->primaryKey;
+    }
+
+    public function getRemotePrimaryKey()
+    {
+        foreach ($this->fieldMappings as $mapping) {
+            if ($mapping->getFieldName() == $this->getPrimaryKey()) {
+                return $mapping->getRemoteName();
+            }
+        }
+
+        throw new \Exception('No mapping found for primary Key in entity : '.$this->name);
     }
 
     /**

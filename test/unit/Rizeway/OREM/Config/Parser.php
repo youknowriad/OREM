@@ -18,7 +18,7 @@ class Parser extends atoum\test
                         'field1' => '',
                         'field2' => array(
                             'remote' => 'field2remote',
-                            'primary_key' => true
+                            'primaryKey' => true
                         ),
                         'field3' => array(
                             'type' => 'boolean'
@@ -41,7 +41,7 @@ class Parser extends atoum\test
                 ->string($entityMapping->getResourceUrl())->isEqualTo('entity')
                 ->string($entityMapping->getName())->isEqualTo('entity')
                 ->string($entityMapping->getPrimaryKey())->isEqualTo('field2')
-                ->array($fieldMappings = $entityMapping->getMappings())->hasSize(5)
+                ->array($fieldMappings = $entityMapping->getFieldMappings())->hasSize(5)
 
                 ->object($fieldMappings[0])->isInstanceOf('Rizeway\\OREM\\Mapping\\Field\\MappingFieldString')
                     ->string($fieldMappings[0]->getFieldName())->isEqualTo('field1')
@@ -52,6 +52,82 @@ class Parser extends atoum\test
                 ->object($fieldMappings[2])->isInstanceOf('Rizeway\\OREM\\Mapping\\Field\\MappingFieldBoolean')
                 ->object($fieldMappings[3])->isInstanceOf('Rizeway\\OREM\\Mapping\\Field\\MappingFieldInteger')
                 ->object($fieldMappings[4])->isInstanceOf('Rizeway\\OREM\\Mapping\\Field\\MappingFieldString')
+        ;
+    }
+
+    public function testHasMany()
+    {
+        $this
+            ->if($object = new TestedClass())
+            ->and($config = array(
+                'entity' => array(
+                    'class' => '\mock\test',
+                    'fields' => array(
+                        'field' => array(
+                            'primaryKey' => true
+                        ),
+                    ),
+                    'hasMany' => array(
+                        'relation' => array(
+                            'remote' => 'remote_relation',
+                            'targetEntity' => 'entity2'
+                        ),
+                    )
+                ),
+                'entity2' => array(
+                'class' => '\mock\test2',
+                'fields' => array(
+                    'field' => array(
+                        'primaryKey' => true
+                    ),
+                ),
+            )))
+            ->then
+                ->array($mappings = $object->parse($config))->hasSize(2)
+                ->object($entityMapping = $mappings['entity'])->isInstanceOf('Rizeway\\OREM\\Mapping\\MappingEntity')
+                ->array($hasManyMappings = $entityMapping->getHasManyMappings())->hasSize(1)
+                ->object($hasManyMappings[0])->isInstanceOf('Rizeway\\OREM\\Mapping\\Relation\\MappingRelationHasMany')
+                ->string($hasManyMappings[0]->getFieldName())->isEqualTo('relation')
+                ->string($hasManyMappings[0]->getRemoteName())->isEqualTo('remote_relation')
+                ->string($hasManyMappings[0]->getEntityName())->isEqualTo('entity2')
+        ;
+    }
+
+    public function testHasOne()
+    {
+        $this
+            ->if($object = new TestedClass())
+            ->and($config = array(
+                    'entity' => array(
+                        'class' => '\mock\test',
+                        'fields' => array(
+                            'field' => array(
+                                'primaryKey' => true
+                            ),
+                        ),
+                        'hasOne' => array(
+                            'relation' => array(
+                                'remote' => 'remote_relation',
+                                'targetEntity' => 'entity2'
+                            ),
+                        )
+                    ),
+                    'entity2' => array(
+                        'class' => '\mock\test2',
+                        'fields' => array(
+                            'field' => array(
+                                'primaryKey' => true
+                            ),
+                        ),
+                    )))
+            ->then
+                ->array($mappings = $object->parse($config))->hasSize(2)
+                ->object($entityMapping = $mappings['entity'])->isInstanceOf('Rizeway\\OREM\\Mapping\\MappingEntity')
+                ->array($hasManyMappings = $entityMapping->getHasOneMappings())->hasSize(1)
+                ->object($hasManyMappings[0])->isInstanceOf('Rizeway\\OREM\\Mapping\\Relation\\MappingRelationHasOne')
+                ->string($hasManyMappings[0]->getFieldName())->isEqualTo('relation')
+                ->string($hasManyMappings[0]->getRemoteName())->isEqualTo('remote_relation')
+                ->string($hasManyMappings[0]->getEntityName())->isEqualTo('entity2')
         ;
     }
 
