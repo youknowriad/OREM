@@ -5,6 +5,7 @@ namespace Rizeway\OREM\Serializer;
 use Rizeway\OREM\Entity\EntityHelper;
 use Rizeway\OREM\Manager;
 use Rizeway\OREM\Store\Store;
+use Rizeway\OREM\Entity\Entity;
 
 class Serializer
 {
@@ -148,10 +149,13 @@ class Serializer
         $classname = $mapping->getClassname();
 
         $entity = unserialize(sprintf('O:%d:"%s":0:{}', strlen($classname), $classname));
-		$entity
-			->__setOremName($name)
-			->__setOremManager($this->manager)
-		;
+
+		if($entity instanceof Entity) {
+			$entity
+				->__setOremName($name)
+				->__setOremManager($this->manager)
+			;
+		}
 
 		return $entity;
     }
