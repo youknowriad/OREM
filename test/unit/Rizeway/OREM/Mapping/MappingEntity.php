@@ -23,6 +23,9 @@ class MappingEntity extends atoum\test
                 ->string($object->getResourceUrl())->isEqualTo('name')
                 ->exception(function() use ($object) { $object->getRemotePrimaryKey(); })
                     ->hasMessage('No mapping found for primary Key in entity : name')
+            ->if($object = new TestedClass('name', 'class', 'test', array(), array(), array(), 'url'))
+            ->then()
+                ->string($object->getResourceUrl())->isEqualTo('url')
         ;
     }
 
