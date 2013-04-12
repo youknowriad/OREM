@@ -40,7 +40,7 @@ class Manager
         $this->connection = $connection;
         $this->mappings   = $mappings;
         $this->store      = new Store($mappings);
-        $this->serializer = new Serializer($mappings, $this->store);
+        $this->serializer = new Serializer($this, $this->store);
     }
 
     /**
@@ -115,19 +115,7 @@ class Manager
 
         try {
             $result = $this->connection->query(ConnectionInterface::METHOD_GET, $mapping->getResourceUrl().'/'.$primaryKeyValue);
-            $entity = $this->serializer->unserializeEntity($result, $mapping->getName())
-                ->__setOremName($entityName)
-                ->__setOremManager($this)
-            ;
-
-            foreach($mapping->getHasOneMappings() as $relation) {
-                $property = $relation->getFieldName();
-
-                $entity->$property
-                    ->__setOremName($relation->getEntityName())
-                    ->__setOremManager($this)
-                ;
-            }
+            $entity = $this->serializer->unserializeEntity($result, $mapping->getName());
 
             return $entity;
         } catch(ExceptionNotFound $e) {
@@ -154,10 +142,7 @@ class Manager
             $result = $this->connection->query(ConnectionInterface::METHOD_GET, $mapping->getResourceUrl().'/'.$primaryKeyValue.'/'.$relation->getRemoteName());
 
             if(is_null($result) === false) {
-                return $this->serializer->unserializeEntity($result, $relation->getEntityName())
-                    ->__setOremName($entityName)
-                    ->__setOremManager($this)
-                ;
+                return $this->serializer->unserializeEntity($result, $relation->getEntityName());
             }
         }
 
@@ -169,10 +154,7 @@ class Manager
             $results = $this->connection->query(ConnectionInterface::METHOD_GET, $mapping->getResourceUrl().'/'.$primaryKeyValue.'/'.$relation->getRemoteName());
             $entities = array();
             foreach ($results as $result) {
-                $entities[] = $this->serializer->unserializeEntity($result, $relation->getEntityName())
-                    ->__setOremName($entityName)
-                    ->__setOremManager($this)
-                ;
+                $entities[] = $this->serializer->unserializeEntity($result, $relation->getEntityName());
             }
 
             return $entities;

@@ -3,14 +3,15 @@
 namespace Rizeway\OREM\Serializer;
 
 use Rizeway\OREM\Entity\EntityHelper;
+use Rizeway\OREM\Manager;
 use Rizeway\OREM\Store\Store;
 
 class Serializer
 {
     /**
-     * @var \Rizeway\OREM\Mapping\MappingEntity[]
+     * @var \Rizeway\OREM\Manager
      */
-    protected $mappings;
+    protected $manager;
 
     /**
      * @var \Rizeway\OREM\Store\Store
@@ -21,9 +22,9 @@ class Serializer
      * @param \Rizeway\OREM\Mapping\MappingEntity[] $mappings
      * @param Store $store
      */
-    public function __construct($mappings, Store $store)
+    public function __construct(Manager $manager, Store $store)
     {
-        $this->mappings = $mappings;
+        $this->manager = $manager;
         $this->store    = $store;
     }
 
@@ -146,20 +147,21 @@ class Serializer
         $mapping = $this->getMappingForEntity($name);
         $classname = $mapping->getClassname();
 
-        return unserialize(sprintf('O:%d:"%s":0:{}', strlen($classname), $classname));
+        $entity = unserialize(sprintf('O:%d:"%s":0:{}', strlen($classname), $classname));
+		$entity
+			->__setOremName($name)
+			->__setOremManager($this->manager)
+		;
+
+		return $entity;
     }
 
-    /**
-     * @param $entityName
-     * @return \Rizeway\OREM\Mapping\MappingEntity
-     * @throws \Exception
-     */
-    protected function getMappingForEntity($entityName)
+	/**
+	 * @param string $entityName
+	 * @return \Rizeway\OREM\Mapping\MappingEntity
+	 */
+	protected function getMappingForEntity($entityName)
     {
-        if (!isset($this->mappings[$entityName])) {
-            throw new \Exception('Unknown Entity : ' . $entityName);
-        }
-
-        return $this->mappings[$entityName];
+        return $this->manager->getMappingForEntity($entityName);
     }
 }
