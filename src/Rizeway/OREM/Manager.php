@@ -115,11 +115,70 @@ class Manager
 
         try {
             $result = $this->connection->query(ConnectionInterface::METHOD_GET, $mapping->getResourceUrl().'/'.$primaryKeyValue);
+            $entity = $this->serializer->unserializeEntity($result, $mapping->getName())
+                ->__setOremName($entityName)
+                ->__setOremManager($this)
+            ;
 
-            return $this->serializer->unserializeEntity($result, $mapping->getName());
+            foreach($mapping->getHasOneMappings() as $relation) {
+                $property = $relation->getFieldName();
+
+                $entity->$property
+                    ->__setOremName($relation->getEntityName())
+                    ->__setOremManager($this)
+                ;
+            }
+
+            return $entity;
         } catch(ExceptionNotFound $e) {
             return null;
         }
+    }
+
+    /**
+     * @param string $entityName
+     * @param mixed $primaryKeyValue
+     * @param string $relationName
+     * @return object|array
+     * @throws \InvalidArgumentException
+     */
+    public function findRelation($entityName, $primaryKeyValue, $relationName)
+    {
+        $mapping = $this->getMappingForEntity($entityName);
+
+        foreach($mapping->getHasOneMappings() as $relation) {
+            if($relation->getFieldName() !== $relationName || $relation->isLazy() === false) {
+                continue;
+            }
+
+            $result = $this->connection->query(ConnectionInterface::METHOD_GET, $mapping->getResourceUrl().'/'.$primaryKeyValue.'/'.$relation->getRemoteName());
+
+            if(is_null($result) === false) {
+                return $this->serializer->unserializeEntity($result, $relation->getEntityName())
+                    ->__setOremName($entityName)
+                    ->__setOremManager($this)
+                ;
+            }
+        }
+
+        foreach($mapping->getHasManyMappings() as $relation) {
+            if($relation->getFieldName() !== $relationName || $relation->isLazy() === false) {
+                continue;
+            }
+
+            $results = $this->connection->query(ConnectionInterface::METHOD_GET, $mapping->getResourceUrl().'/'.$primaryKeyValue.'/'.$relation->getRemoteName());
+            $entities = array();
+            foreach ($results as $result) {
+                $entities[] = $this->serializer->unserializeEntity($result, $relation->getEntityName())
+                    ->__setOremName($entityName)
+                    ->__setOremManager($this)
+                ;
+            }
+
+            return $entities;
+        }
+
+        throw new \InvalidArgumentException('Unknown relation : ' . $relationName);
     }
 
     /**

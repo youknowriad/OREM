@@ -65,6 +65,10 @@ class Serializer
         }
 
         foreach ($mapping->getHasManyMappings() as $relationMapping) {
+            if($relationMapping->isLazy()) {
+                continue;
+            }
+
             $propertyValue = $helper->getPropertyValue($object, $relationMapping->getFieldName());
             $serial[$relationMapping->getRemoteName()] = null;
             if (!is_null($propertyValue)) {
@@ -77,8 +81,12 @@ class Serializer
         }
 
         foreach ($mapping->getHasOneMappings() as $relationMapping) {
+            if($relationMapping->isLazy()) {
+                continue;
+            }
+
             $propertyValue = $helper->getPropertyValue($object, $relationMapping->getFieldName());
-            $serial[$relationMapping->getRemoteName()] = is_null($propertyValue) ? null : $this->serializeEntity($propertyValue,
+            $serial[$relationMapping->getFieldName()] = is_null($propertyValue) ? null : $this->serializeEntity($propertyValue,
                 $relationMapping->getEntityName());
         }
 
@@ -103,6 +111,10 @@ class Serializer
         }
 
         foreach ($mapping->getHasManyMappings() as $relationMapping) {
+            if($relationMapping->isLazy()) {
+                continue;
+            }
+
             if (isset($serial[$relationMapping->getRemoteName()])) {
                 $subEntities = array();
                 foreach ($serial[$relationMapping->getRemoteName()] as $subEntitySerial)
@@ -114,6 +126,10 @@ class Serializer
         }
 
         foreach ($mapping->getHasOneMappings() as $relationMapping) {
+            if($relationMapping->isLazy()) {
+                continue;
+            }
+
             if (isset($serial[$relationMapping->getRemoteName()])) {
                 $helper->setPropertyValue($object, $relationMapping->getFieldName(),
                     $this->unserializeEntity($serial[$relationMapping->getRemoteName()], $relationMapping->getEntityName()));

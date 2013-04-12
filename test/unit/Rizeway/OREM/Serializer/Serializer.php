@@ -26,7 +26,21 @@ class Serializer extends atoum\test
     {
         $this
             ->if($mappingField = new MappingFieldString('test'))
-            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\Serializer\MyEntity', 'test', array('test' => $mappingField), array()))
+            ->and($related = new MappingEntity(
+                'related',
+                '\test\unit\Rizeway\OREM\Serializer\MyEntityRelated',
+                'test',
+                array(new MappingFieldString('test'))
+            ))
+            ->and($mappingRelation = new MappingRelationHasOne('related', 'relation', null, true))
+            ->and($mapping = new MappingEntity(
+                'entity',
+                '\test\unit\Rizeway\OREM\Serializer\MyEntity',
+                'test',
+                array('test' => $mappingField),
+                array($mappingRelation),
+                array($mappingRelation)
+            ))
             ->and($object = new TestedClass(array('entity' => $mapping), new Store(array('entity' => $mapping))))
             ->then
                 ->object($object)->isInstanceOf('Rizeway\\OREM\\Serializer\\Serializer')

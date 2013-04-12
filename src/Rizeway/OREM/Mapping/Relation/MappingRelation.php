@@ -11,9 +11,15 @@ class MappingRelation extends MappingField implements MappingRelationInterface
      */
     protected $entityName;
 
-    public function __construct($entityName, $fieldname, $remotename = null)
+    /**
+     * @var bool
+     */
+    protected $lazy;
+
+    public function __construct($entityName, $fieldname, $remotename = null, $lazy = false)
     {
         $this->entityName = $entityName;
+        $this->lazy = $lazy;
 
         parent::__construct($fieldname, $remotename);
     }
@@ -24,5 +30,13 @@ class MappingRelation extends MappingField implements MappingRelationInterface
     public function getEntityName()
     {
         return $this->entityName;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isLazy()
+    {
+        return $this->lazy;
     }
 }
