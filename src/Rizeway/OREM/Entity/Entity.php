@@ -48,13 +48,23 @@ class Entity
     {
         if(preg_match('/get([A-Z][a-zA-Z0-9_]*)/', $method, $matches)) {
             $relation = strtolower($matches[1]);
+            $primaryKey = $this->__oremManager->getMappingForObject($this)->getPrimaryKey();
 
             $this->$relation = $this->__oremManager->getRepository($this->__oremName)->findRelation(
-                $this->login,
+                $this->$primaryKey,
                 $relation
             );
 
             return $this->$relation;
         }
+    }
+
+    public function refresh() {
+        $this->__oremManager->find(
+            $this->__oremName,
+            $this->__oremManager->getMappingForObject($this)->getPrimaryKey()
+        );
+
+        return $this;
     }
 }
