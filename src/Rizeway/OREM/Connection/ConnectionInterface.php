@@ -9,6 +9,11 @@ interface ConnectionInterface
     const METHOD_DELETE = 'DELETE';
     const METHOD_POST = 'POST';
 
+	/**
+	 * @return mixed
+	 */
+	public function getClient();
+
     /**
      * @param string $method
      * @param string $resource

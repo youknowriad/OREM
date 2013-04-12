@@ -205,4 +205,12 @@ class Manager
 
         throw new \Exception('No Mapping Entity found for class : '. get_class($object));
     }
+
+	/**
+	 * @return Connection\ConnectionInterface
+	 */
+	public function getConnection()
+	{
+		return $this->connection;
+	}
 }
