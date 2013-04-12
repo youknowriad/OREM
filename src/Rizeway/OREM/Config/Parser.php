@@ -54,7 +54,9 @@ class Parser
                 }
             }
 
-            $mappings[$name] = new MappingEntity($name, $class, $primaryKey, $fieldmappings, $hasManyMappings, $hasOneMappings);
+            $url = isset($entityConfiguration['url']) ? $entityConfiguration['url'] : null;
+
+            $mappings[$name] = new MappingEntity($name, $class, $primaryKey, $fieldmappings, $hasManyMappings, $hasOneMappings, $url);
         }
 
         return $mappings;

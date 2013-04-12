@@ -36,15 +36,21 @@ class MappingEntity
     protected $primaryKey;
 
     /**
+     * @var string
+     */
+    protected $url;
+
+    /**
      * @param string $name
      * @param string $classname
      * @param string $primaryKey
      * @param \Rizeway\OREM\Mapping\Field\MappingFieldInterface[] $fieldMappings
      * @param \Rizeway\OREM\Mapping\Relation\MappingRelationInterface[] $hasManyMappings
      * @param \Rizeway\OREM\Mapping\Relation\MappingRelationInterface[] $hasOneMappings
+     * @param string $url
      */
     public function __construct($name, $classname, $primaryKey, $fieldMappings,
-        $hasManyMappings = array(), $hasOneMappings = array())
+        $hasManyMappings = array(), $hasOneMappings = array(), $url = null)
     {
         $this->name            = $name;
         $this->classname       = $classname;
@@ -52,6 +58,7 @@ class MappingEntity
         $this->fieldMappings   = $fieldMappings;
         $this->hasManyMappings = $hasManyMappings;
         $this->hasOneMappings  = $hasOneMappings;
+        $this->url             = $url;
     }
 
     /**
@@ -59,7 +66,7 @@ class MappingEntity
      */
     public function getResourceUrl()
     {
-        return $this->name;
+        return is_null($this->url) ? $this->name : $this->url;
     }
 
     /**
