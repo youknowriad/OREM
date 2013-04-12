@@ -87,13 +87,14 @@ class Manager
 
     /**
      * @param string $entityName
+     * @param string[] $urlParameters
      * @return object[]
      * @throws \Exception
      */
-    public function findAll($entityName)
+    public function findQuery($entityName, array $urlParameters = array())
     {
         $mapping = $this->getMappingForEntity($entityName);
-        $results = $this->connection->query(ConnectionInterface::METHOD_GET, $mapping->getResourceUrl());
+        $results = $this->connection->query(ConnectionInterface::METHOD_GET, $mapping->getResourceUrl(), null, $urlParameters);
         $entities = array();
         foreach ($results as $result) {
             $entities[] = $this->serializer->unserializeEntity($result, $mapping->getName());

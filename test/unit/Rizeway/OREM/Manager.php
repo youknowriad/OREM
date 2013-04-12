@@ -53,7 +53,7 @@ class Manager extends atoum\test
         ;
     }
 
-    public function testFindAll()
+    public function testFindQuery()
     {
         $this
             ->if($connection = new \mock\Rizeway\OREM\Connection\ConnectionInterface())
@@ -64,10 +64,10 @@ class Manager extends atoum\test
             ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', 'test', array('test' => $mappingField), array()))
             ->and($object = new TestedClass($connection, array('entity' => $mapping)))
             ->then
-                ->array($result = $object->findAll('entity'))->hasSize(1)
+                ->array($result = $object->findQuery('entity'))->hasSize(1)
                 ->object($entity = current($result))->isInstanceOf('\test\unit\Rizeway\OREM\MyEntity')
                 ->string($entity->test)->isEqualTo('value')
-                ->exception(function() use ($object) { $object->findAll('toto'); })
+                ->exception(function() use ($object) { $object->findQuery('toto'); })
                     ->hasMessage('Unknown Entity : toto')
         ;
     }

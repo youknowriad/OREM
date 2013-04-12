@@ -126,7 +126,6 @@ Install using composer
 Roadmap
 -------
 
- - Find Query Handling (GET with Url parameters)
  - Url Customisation
  - Handling HasMany and HasOne lazy loading
  - Handling Cascade Delete And Options to disable Cascade update

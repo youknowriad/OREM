@@ -32,7 +32,7 @@ class Repository
      */
     public function findAll()
     {
-        return $this->manager->findAll($this->name);
+        return $this->manager->findQuery($this->name);
     }
 
     /**
@@ -42,6 +42,15 @@ class Repository
     public function find($id)
     {
         return $this->manager->find($this->name, $id);
+    }
+
+    /**
+     * @param array $urlParameters
+     * @return \object[]
+     */
+    public function findQuery($urlParameters = array())
+    {
+        return $this->manager->findQuery($this->name, $urlParameters);
     }
 
 }

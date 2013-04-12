@@ -12,7 +12,7 @@ class Repository extends atoum\test
         $this
             ->if($manager = new \mock\Rizeway\OREM\Manager(new \mock\Rizeway\OREM\Connection\ConnectionInterface(), array()))
             ->and($manager->getMockController()->find = null)
-            ->and($manager->getMockController()->findAll = array())
+            ->and($manager->getMockController()->findQuery = array())
             ->and($object = new TestedClass($manager, 'test'))
             ->then
                 ->object($object)->isInstanceOf('Rizeway\\OREM\\Repository\\Repository')
@@ -24,6 +24,10 @@ class Repository extends atoum\test
                 ->mock($manager)
                     ->call('findAll')
                     ->withArguments('test')
+                ->array($object->findQuery(array('toto' => 'tata')))->isEqualTo(array())
+                    ->mock($manager)
+                    ->call('findQuery')
+                    ->withArguments('test', array('toto' => 'tata'))
         ;
     }
 }
