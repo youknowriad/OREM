@@ -21,6 +21,10 @@ class Repository extends atoum\test
             ->then
                 ->mock($manager)
                     ->call('findQuery')->withArguments('test', array('toto' => 'tata'))->once()
+            ->if($object->findAll())
+            ->then
+                ->mock($manager)
+                    ->call('findQuery')->withArguments('test', array())->once()
             ->if($object->findRelation('id', 'relation'))
             ->then
                 ->mock($manager)
