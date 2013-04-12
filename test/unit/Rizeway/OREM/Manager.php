@@ -43,6 +43,7 @@ class Manager extends atoum\test
             ->and($object = new TestedClass($connection, array()))
             ->then
                 ->object($object)->isInstanceOf('Rizeway\\OREM\\Manager')
+				->object($object->getConnection())->isIdenticalTo($connection)
         ;
     }
 
