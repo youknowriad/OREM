@@ -12,7 +12,11 @@ class MappingRelation extends atoum\test
             ->if($object = new \mock\Rizeway\OREM\Mapping\Relation\MappingRelation('entity', 'field', 'remote'))
             ->then
                 ->object($object)->isInstanceOf('Rizeway\\OREM\\Mapping\\Relation\\MappingRelation')
-                ->string($object->getEntityName('field'))
+                ->string($object->getEntityName())->isEqualTo('entity')
+                ->boolean($object->isLazy())->isFalse()
+            ->if($object = new \mock\Rizeway\OREM\Mapping\Relation\MappingRelation('entity', 'field', 'remote', true))
+            ->then
+                ->boolean($object->isLazy())->isTrue()
         ;
     }
 }

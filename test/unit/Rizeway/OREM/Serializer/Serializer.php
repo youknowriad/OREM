@@ -8,14 +8,16 @@ use Rizeway\OREM\Mapping\Relation\MappingRelationHasMany;
 use Rizeway\OREM\Mapping\Relation\MappingRelationHasOne;
 use Rizeway\OREM\Serializer\Serializer as TestedClass;
 use Rizeway\OREM\Store\Store;
+use Rizeway\OREM\Manager;
+use Rizeway\OREM\Entity\Entity;
 use atoum;
 
-class MyEntity {
+class MyEntity extends Entity {
     public $test;
     public $relation;
 }
 
-class MyEntityRelated {
+class MyEntityRelated extends Entity {
     public $test;
     public $prop;
 }
@@ -26,8 +28,23 @@ class Serializer extends atoum\test
     {
         $this
             ->if($mappingField = new MappingFieldString('test'))
-            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\Serializer\MyEntity', 'test', array('test' => $mappingField), array()))
-            ->and($object = new TestedClass(array('entity' => $mapping), new Store(array('entity' => $mapping))))
+            ->and($related = new MappingEntity(
+                'related',
+                '\test\unit\Rizeway\OREM\Serializer\MyEntityRelated',
+                'test',
+                array(new MappingFieldString('test'))
+            ))
+            ->and($mappingRelation = new MappingRelationHasOne('related', 'relation', null, true))
+            ->and($mapping = new MappingEntity(
+                'entity',
+                '\test\unit\Rizeway\OREM\Serializer\MyEntity',
+                'test',
+                array('test' => $mappingField),
+                array($mappingRelation),
+                array($mappingRelation)
+            ))
+			->and($manager = new Manager(new \mock\Rizeway\OREM\Connection\ConnectionInterface(), array('entity' => $mapping)))
+            ->and($object = new TestedClass($manager, new Store(array('entity' => $mapping))))
             ->then
                 ->object($object)->isInstanceOf('Rizeway\\OREM\\Serializer\\Serializer')
                 ->object($entity = $object->unserializeEntity(array('test' => 'toto'), 'entity'))->isInstanceOf('test\unit\Rizeway\OREM\Serializer\MyEntity')
@@ -51,7 +68,8 @@ class Serializer extends atoum\test
             ->and($mapping2 = new MappingEntity('entity2', '\test\unit\Rizeway\OREM\Serializer\MyEntityRelated', 'test',
                     array('test' => $mappingField), array()))
             ->and($mappings = array('entity' => $mapping, 'entity2' => $mapping2))
-            ->and($object = new TestedClass($mappings, new Store($mappings)))
+			->and($manager = new Manager(new \mock\Rizeway\OREM\Connection\ConnectionInterface(), $mappings))
+            ->and($object = new TestedClass($manager, new Store($mappings)))
             ->and($serial = array('test' => 'toto', 'relation' => array('test' => 'tata')))
             ->then
                 ->object($entity = $object->unserializeEntity($serial, 'entity'))
@@ -75,7 +93,8 @@ class Serializer extends atoum\test
             ->and($mapping2 = new MappingEntity('entity2', '\test\unit\Rizeway\OREM\Serializer\MyEntityRelated', 'test',
                 array('test' => $mappingField), array()))
             ->and($mappings = array('entity' => $mapping, 'entity2' => $mapping2))
-            ->and($object = new TestedClass($mappings, new Store($mappings)))
+			->and($manager = new Manager(new \mock\Rizeway\OREM\Connection\ConnectionInterface(), $mappings))
+            ->and($object = new TestedClass($manager, new Store($mappings)))
             ->and($serial = array('test' => 'toto', 'relation' => array(array('test' => 'tata'))))
             ->then
                 ->object($entity = $object->unserializeEntity($serial, 'entity'))
@@ -98,7 +117,8 @@ class Serializer extends atoum\test
                     array($mappingField, $mappingFieldProp), array()))
             ->and($mappings = array('entity' => $mapping, 'entity2' => $mapping2))
             ->and($store = new Store($mappings))
-            ->and($object = new TestedClass($mappings, $store))
+			->and($manager = new Manager(new \mock\Rizeway\OREM\Connection\ConnectionInterface(), $mappings))
+            ->and($object = new TestedClass($manager, $store))
             ->and($serial = array('test' => 'toto', 'relation' => array('test' => 'tata', 'prop' => 'titi')))
             ->and($entityRelated = new MyEntityRelated())
             ->and($entityRelated->test = 'tata')
