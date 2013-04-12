@@ -41,16 +41,24 @@ class Parser
             $hasManyMappings = array();
             if (isset($entityConfiguration['hasMany'])) {
                 foreach ($entityConfiguration['hasMany'] as $fieldname => $relationConfiguration) {
-                    $hasManyMappings[] = new MappingRelationHasMany($relationConfiguration['targetEntity'],
-                        $fieldname, isset($relationConfiguration['remote']) ? $relationConfiguration['remote'] : null);
+                    $hasManyMappings[] = new MappingRelationHasMany(
+                        $relationConfiguration['targetEntity'],
+                        $fieldname,
+                        isset($relationConfiguration['remote']) ? $relationConfiguration['remote'] : null,
+                        isset($relationConfiguration['lazy']) ? $relationConfiguration['lazy'] : false
+                    );
                 }
             }
 
             $hasOneMappings = array();
             if (isset($entityConfiguration['hasOne'])) {
                 foreach ($entityConfiguration['hasOne'] as $fieldname => $relationConfiguration) {
-                    $hasOneMappings[] = new MappingRelationHasOne($relationConfiguration['targetEntity'],
-                        $fieldname, isset($relationConfiguration['remote']) ? $relationConfiguration['remote'] : null);
+                    $hasOneMappings[] = new MappingRelationHasOne(
+                        $relationConfiguration['targetEntity'],
+                        $fieldname,
+                        isset($relationConfiguration['remote']) ? $relationConfiguration['remote'] : null,
+                        isset($relationConfiguration['lazy']) ? $relationConfiguration['lazy'] : false
+                    );
                 }
             }
 
