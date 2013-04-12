@@ -52,6 +52,32 @@ class Parser extends atoum\test
                 ->object($fieldMappings[2])->isInstanceOf('Rizeway\\OREM\\Mapping\\Field\\MappingFieldBoolean')
                 ->object($fieldMappings[3])->isInstanceOf('Rizeway\\OREM\\Mapping\\Field\\MappingFieldInteger')
                 ->object($fieldMappings[4])->isInstanceOf('Rizeway\\OREM\\Mapping\\Field\\MappingFieldString')
+            ->if($config = array(
+                'entity' => array(
+                    'class' => '\mock\test',
+                    'url' => '/url',
+                    'fields' => array(
+                        'field1' => '',
+                        'field2' => array(
+                            'remote' => 'field2remote',
+                            'primaryKey' => true
+                        ),
+                        'field3' => array(
+                            'type' => 'boolean'
+                        ),
+                        'field4' => array(
+                            'type' => 'integer'
+                        ),
+                        'field5' => array(
+                            'type' => 'string'
+                        )
+                    )
+                )
+            ))
+            ->and($mappings = $object->parse($config))
+            ->and($entityMapping = current($mappings))
+            ->then
+                ->string($entityMapping->getResourceUrl())->isEqualTo('/url')
         ;
     }
 
@@ -75,11 +101,11 @@ class Parser extends atoum\test
                     )
                 ),
                 'entity2' => array(
-                'class' => '\mock\test2',
-                'fields' => array(
-                    'field' => array(
-                        'primaryKey' => true
-                    ),
+                    'class' => '\mock\test2',
+                    'fields' => array(
+                        'field' => array(
+                            'primaryKey' => true
+                        ),
                 ),
             )))
             ->then
