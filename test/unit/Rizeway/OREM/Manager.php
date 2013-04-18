@@ -55,10 +55,50 @@ class Manager extends atoum\test
             ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', 'test', array('test' => $mappingField), array()))
             ->and($object = new TestedClass($connection, array('entity' => $mapping)))
             ->then
-                ->object($object->getRepository('entity'))
+                ->object($repository = $object->getRepository('entity'))
                     ->isInstanceOf('Rizeway\\OREM\\Repository\Repository')
+                ->object($object->getRepository('entity'))->isIdenticalTo($repository)
                 ->exception(function() use ($object) { $object->getRepository('test'); })
                     ->hasMessage('Unknown Entity : test')
+        ;
+    }
+
+    public function testGetAdapter()
+    {
+        $this
+            ->if($connection = new \mock\Rizeway\OREM\Connection\ConnectionInterface())
+            ->and($mappingField = new MappingFieldString('test'))
+            ->and($mapping = new MappingEntity(
+                'entity',
+                '\test\unit\Rizeway\OREM\MyEntity',
+                'test',
+                array('test' => $mappingField),
+                array(),
+                array(),
+                'url',
+                '\\mock\\Rizeway\\OREM\\Adapter\\Adapter'
+            ))
+            ->and($object = new TestedClass($connection, array('entity' => $mapping)))
+            ->then
+                ->object($adapter = $object->getAdapter('entity'))
+                    ->isInstanceOf('\\Rizeway\\OREM\\Adapter\\AdapterInterface')
+                ->object($object->getAdapter('entity'))->isIdenticalTo($adapter)
+                ->exception(function() use ($object) { $object->getAdapter('test'); })
+                    ->hasMessage('Unknown Entity : test')
+            ->if($mapping = new MappingEntity(
+                'entity',
+                '\test\unit\Rizeway\OREM\MyEntity',
+                'test',
+                array('test' => $mappingField),
+                array(),
+                array(),
+                'url',
+                '\\mock\\Unknown\\Rizeway\\OREM\\Adapter\\Adapter'
+            ))
+            ->and($object = new TestedClass($connection, array('entity' => $mapping)))
+            ->then
+                ->exception(function() use ($object) { $object->getAdapter('entity'); })
+                    ->hasMessage('Adapter \\mock\\Unknown\\Rizeway\\OREM\\Adapter\\Adapter of entity entity is not a valid adapter')
         ;
     }
 

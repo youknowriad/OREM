@@ -37,7 +37,13 @@ class Serializer
     public function unserializeEntity(array $serial, $name)
     {
         $mapping = $this->getMappingForEntity($name);
-        $primaryKey = $serial[$mapping->getRemotePrimaryKey()];
+
+        try {
+            $primaryKey = $serial[$mapping->getRemotePrimaryKey()];
+        } catch (\Exception $e) {
+            $primaryKey = null;
+        }
+
         if ($this->store->hasEntity($name, $primaryKey)) {
             $object = $this->store->getEntity($name, $primaryKey);
             $this->updateEntity($object, $serial, $name);

@@ -109,7 +109,7 @@ class Serializer extends atoum\test
     {
         $this
             ->if($mappingField = new MappingFieldString('test'))
-            ->if($mappingFieldProp = new MappingFieldString('prop'))
+            ->and($mappingFieldProp = new MappingFieldString('prop'))
             ->and($mappingRelation = new MappingRelationHasOne('entity2', 'relation'))
             ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\Serializer\MyEntity', 'test',
                     array($mappingField), array(), array($mappingRelation)))
@@ -127,6 +127,39 @@ class Serializer extends atoum\test
             ->then
                 ->object($entity->relation)->isIdenticalTo($entityRelated)
                 ->string($entityRelated->prop)->isEqualTo('titi')
+        ;
+    }
+
+    public function testUnserializeEntity()
+    {
+        $this
+            ->if($mappingField = new MappingFieldString('test'))
+            ->and($mapping = new MappingEntity(
+                'entity',
+                '\test\unit\Rizeway\OREM\Serializer\MyEntity',
+                'test',
+                array($mappingField)
+            ))
+            ->and($mappings = array('entity' => $mapping))
+            ->and($store = new \mock\Rizeway\OREM\Store\Store($mappings))
+			->and($manager = new Manager(new \mock\Rizeway\OREM\Connection\ConnectionInterface(), $mappings))
+            ->and($object = new TestedClass($manager, $store))
+            ->then
+                ->object($result = $object->unserializeEntity(array('test' => 'value'), 'entity'))->isInstanceOf('\\test\\unit\\Rizeway\\OREM\\Serializer\\MyEntity')
+                ->string($result->test)->isEqualTo('value')
+            ->if($mapping = new MappingEntity(
+                'entity',
+                '\test\unit\Rizeway\OREM\Serializer\MyEntity',
+                null,
+                array($mappingField)
+            ))
+            ->and($mappings = array('entity' => $mapping))
+            ->and($store = new \mock\Rizeway\OREM\Store\Store($mappings))
+			->and($manager = new Manager(new \mock\Rizeway\OREM\Connection\ConnectionInterface(), $mappings))
+            ->and($object = new TestedClass($manager, $store))
+            ->then
+                ->object($result = $object->unserializeEntity(array('test' => 'value'), 'entity'))->isInstanceOf('\\test\\unit\\Rizeway\\OREM\\Serializer\\MyEntity')
+                ->string($result->test)->isEqualTo('value')
         ;
     }
 }
