@@ -43,10 +43,10 @@ class Parser extends atoum\test
                 ->string($entityMapping->getPrimaryKey())->isEqualTo('field2')
                 ->array($fieldMappings = $entityMapping->getFieldMappings())->hasSize(5)
 
-                ->object($fieldMappings[0])->isInstanceOf('Rizeway\\OREM\\Mapping\\Field\\MappingFieldString')
+                ->object($fieldMappings[0])->isInstanceOf('Rizeway\\OREM\\Mapping\\Field\\MappingFieldDefault')
                     ->string($fieldMappings[0]->getFieldName())->isEqualTo('field1')
                     ->string($fieldMappings[0]->getRemoteName())->isEqualTo('field1')
-                ->object($fieldMappings[1])->isInstanceOf('Rizeway\\OREM\\Mapping\\Field\\MappingFieldString')
+                ->object($fieldMappings[1])->isInstanceOf('Rizeway\\OREM\\Mapping\\Field\\MappingFieldDefault')
                     ->string($fieldMappings[1]->getFieldName())->isEqualTo('field2')
                     ->string($fieldMappings[1]->getRemoteName())->isEqualTo('field2remote')
                 ->object($fieldMappings[2])->isInstanceOf('Rizeway\\OREM\\Mapping\\Field\\MappingFieldBoolean')

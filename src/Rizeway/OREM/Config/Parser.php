@@ -27,7 +27,7 @@ class Parser
             $primaryKey = null;
             foreach ($entityConfiguration['fields'] as $fieldname => $fieldConfiguration) {
                 $primaryKey = isset($fieldConfiguration['primaryKey']) && $fieldConfiguration['primaryKey'] ? $fieldname : $primaryKey;
-                $type = isset($fieldConfiguration['type']) ? $fieldConfiguration['type'] : 'string';
+                $type = isset($fieldConfiguration['type']) ? $fieldConfiguration['type'] : 'default';
                 $classname = '\Rizeway\OREM\Mapping\Field\MappingField'.ucfirst($type);
                 if (!class_exists($classname)) {
                     throw new \Exception('Invalid field type '.$type);
