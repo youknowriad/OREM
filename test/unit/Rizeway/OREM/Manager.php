@@ -3,16 +3,20 @@
 namespace test\unit\Rizeway\OREM;
 
 use Rizeway\OREM\Exception\ExceptionNotFound;
+use Rizeway\OREM\Mapping\Relation\MappingRelationHasMany;
+use Rizeway\OREM\Mapping\Relation\MappingRelationHasOne;
+use Rizeway\OREM\Entity\Entity;
 use Rizeway\OREM\Manager as TestedClass;
 use Rizeway\OREM\Mapping\Field\MappingFieldString;
 use Rizeway\OREM\Mapping\MappingEntity;
 use atoum;
 
-class MyEntity {
+class MyEntity extends Entity {
     public $test;
+    public $relation;
 }
 
-class MyEntityGetter {
+class MyEntityGetter extends Entity {
     private $tested_value;
 
     public function getTestedValue()
@@ -26,6 +30,10 @@ class MyEntityGetter {
     }
 }
 
+class MyEntityRelated extends Entity {
+    public $test;
+}
+
 class Manager extends atoum\test
 {
     public function test__construct()
@@ -35,6 +43,7 @@ class Manager extends atoum\test
             ->and($object = new TestedClass($connection, array()))
             ->then
                 ->object($object)->isInstanceOf('Rizeway\\OREM\\Manager')
+				->object($object->getConnection())->isIdenticalTo($connection)
         ;
     }
 
@@ -87,6 +96,7 @@ class Manager extends atoum\test
                 ->mock($connection)
                     ->call('query')
                     ->withArguments('POST', 'entity', array('test' => 'toto'))
+                    ->once()
                 ->string($entity->test)->isEqualTo('tata')
         ;
     }
@@ -106,6 +116,7 @@ class Manager extends atoum\test
                 ->mock($connection)
                     ->call('query')
                     ->withArguments('PUT', 'entity/toto', array('test' => 'toto'))
+                    ->once()
                 ->string($entity->test)->isEqualTo('tata')
         ;
     }
@@ -123,11 +134,110 @@ class Manager extends atoum\test
                 ->mock($connection)
                     ->call('query')
                     ->withArguments('GET', 'entity/id', array())
+                    ->once()
                 ->object($entity)->isInstanceOf('\test\unit\Rizeway\OREM\MyEntity')
                 ->string($entity->test)->isEqualTo('id')
             ->if($connection->getMockController()->query->throw = new ExceptionNotFound('test', 404))
             ->then
                 ->variable($object->find('entity', 'id'))->isNull()
+
+            ->if($connection->getMockController()->resetCalls())
+            ->and($connection->getMockController()->query = array('test' => 'id', 'relation' => array('test' => 'id')))
+            ->and($mappingField = new MappingFieldString('test'))
+            ->and($mappingRelation = new MappingRelationHasOne('related', 'relation'))
+            ->and($mapping = new MappingEntity(
+                'entity',
+                '\test\unit\Rizeway\OREM\MyEntity',
+                'test',
+                array($mappingField),
+                array(),
+                array($mappingRelation)
+            ))
+            ->and($related = new MappingEntity(
+                'related',
+                '\test\unit\Rizeway\OREM\MyEntityRelated',
+                'test',
+                array($mappingField)
+            ))
+            ->and($mappings = array('entity' => $mapping, 'related' => $related))
+            ->and($object = new TestedClass($connection, $mappings))
+            ->and($object->find('entity', 'id'))
+            ->then
+                ->mock($connection)
+                    ->call('query')->withArguments('GET', 'entity/id', array())->once()
+        ;
+    }
+
+    public function testFindRelation()
+    {
+        $this
+            ->if($connection = new \mock\Rizeway\OREM\Connection\ConnectionInterface())
+            ->and($connection->getMockController()->query = array('test' => 'id'))
+            ->and($mappingField = new MappingFieldString('test'))
+            ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', 'test', array('test' => $mappingField), array()))
+            ->and($object = new TestedClass($connection, array('entity' => $mapping)))
+            ->and($entity = $object->find('entity', 'id'))
+            ->then
+                ->exception(function() use ($object) { $object->findRelation('entity', 'id', 'related'); })
+                    ->isInstanceOf('\\InvalidArgumentException')
+                    ->hasMessage('Unknown relation : related')
+
+            ->if($connection->getMockController()->resetCalls())
+            ->and($connection->getMockController()->query = array('test' => 'id'))
+            ->and($mappingField = new MappingFieldString('test'))
+            ->and($mappingRelation = new MappingRelationHasOne('related', 'relation', null, true))
+            ->and($mapping = new MappingEntity(
+                'entity',
+                '\test\unit\Rizeway\OREM\MyEntity',
+                'test',
+                array($mappingField),
+                array(),
+                array(new MappingRelationHasOne('useless', 'uselessRelation', null, true), $mappingRelation)
+            ))
+            ->and($related = new MappingEntity(
+                'related',
+                '\test\unit\Rizeway\OREM\MyEntityRelated',
+                'test',
+                array($mappingField)
+            ))
+            ->and($useless = new MappingEntity(
+                'useless',
+                '\test\unit\Rizeway\OREM\MyEntityGetter',
+                'tested_value',
+                array(new MappingFieldString('tested_value'))
+            ))
+            ->and($mappings = array('entity' => $mapping, 'related' => $related, 'useless' => $useless))
+            ->and($object = new TestedClass($connection, $mappings))
+            ->then
+                ->object($object->findRelation('entity', 'id', 'relation'))->isInstanceOf('\test\unit\Rizeway\OREM\MyEntityRelated')
+                ->mock($connection)
+                    ->call('query')->withArguments('GET', 'entity/id/relation', array())->once()
+
+            ->if($connection->getMockController()->resetCalls())
+            ->and($connection->getMockController()->query = array(array('test' => 'id')))
+            ->and($mappingField = new MappingFieldString('test'))
+            ->and($mappingRelation = new MappingRelationHasMany('related', 'relation', null, true))
+            ->and($mapping = new MappingEntity(
+                'entity',
+                '\test\unit\Rizeway\OREM\MyEntity',
+                'test',
+                array($mappingField),
+                array(new MappingRelationHasOne('useless', 'uselessRelation', null, true), $mappingRelation),
+                array()
+            ))
+            ->and($related = new MappingEntity(
+                'related',
+                '\test\unit\Rizeway\OREM\MyEntityRelated',
+                'test',
+                array($mappingField)
+            ))
+            ->and($mappings = array('entity' => $mapping, 'related' => $related, 'useless' => $useless))
+            ->and($object = new TestedClass($connection, $mappings))
+            ->then
+                ->array($result = $object->findRelation('entity', 'id', 'relation'))->hasSize(1)
+                ->object($result[0])->isInstanceOf('\test\unit\Rizeway\OREM\MyEntityRelated')
+                ->mock($connection)
+                    ->call('query')->withArguments('GET', 'entity/id/relation', array())->once()
         ;
     }
 
@@ -145,10 +255,11 @@ class Manager extends atoum\test
                 ->mock($connection)
                     ->call('query')
                     ->withArguments('DELETE', 'entity/toto', array())
+                    ->once()
                 ->exception(function() use ($object) { $object->remove(new \mock\test()); })
                     ->hasMessage('No Mapping Entity found for class : mock\test')
-
-            ->if($mappingField = new MappingFieldString('tested_value'))
+            ->if($connection->getMockController()->resetCalls())
+            ->and($mappingField = new MappingFieldString('tested_value'))
             ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntityGetter', 'tested_value', array('tested_value' => $mappingField), array()))
             ->and($object = new TestedClass($connection, array('entity' => $mapping)))
             ->and($entity = new MyEntityGetter())
@@ -158,6 +269,7 @@ class Manager extends atoum\test
                 ->mock($connection)
                     ->call('query')
                     ->withArguments('DELETE', 'entity/toto', array())
+                    ->once()
             ;
     }
 }

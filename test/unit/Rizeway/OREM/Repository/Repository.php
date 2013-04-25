@@ -10,24 +10,25 @@ class Repository extends atoum\test
     public function testAll()
     {
         $this
+            ->if($this->mockGenerator->shuntParentClassCalls())
             ->if($manager = new \mock\Rizeway\OREM\Manager(new \mock\Rizeway\OREM\Connection\ConnectionInterface(), array()))
-            ->and($manager->getMockController()->find = null)
-            ->and($manager->getMockController()->findQuery = array())
             ->and($object = new TestedClass($manager, 'test'))
+            ->and($object->find('id'))
             ->then
-                ->object($object)->isInstanceOf('Rizeway\\OREM\\Repository\\Repository')
-                ->variable($object->find('id'))->isNull()
                 ->mock($manager)
-                    ->call('find')
-                        ->withArguments('test', 'id')
-                ->array($object->findAll())->isEqualTo(array())
+                    ->call('find')->withArguments('test', 'id')->once()
+            ->if($object->findQuery(array('toto' => 'tata')))
+            ->then
                 ->mock($manager)
-                    ->call('findAll')
-                    ->withArguments('test')
-                ->array($object->findQuery(array('toto' => 'tata')))->isEqualTo(array())
-                    ->mock($manager)
-                    ->call('findQuery')
-                    ->withArguments('test', array('toto' => 'tata'))
+                    ->call('findQuery')->withArguments('test', array('toto' => 'tata'))->once()
+            ->if($object->findAll())
+            ->then
+                ->mock($manager)
+                    ->call('findQuery')->withArguments('test', array())->once()
+            ->if($object->findRelation('id', 'relation'))
+            ->then
+                ->mock($manager)
+                    ->call('findRelation')->withArguments('test', 'id', 'relation')->once()
         ;
     }
 }
