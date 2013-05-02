@@ -2,6 +2,8 @@
 
 namespace Rizeway\OREM\Connection;
 
+use Guzzle\Http\ClientInterface;
+
 interface ConnectionInterface
 {
     const METHOD_GET = 'GET';
@@ -9,10 +11,15 @@ interface ConnectionInterface
     const METHOD_DELETE = 'DELETE';
     const METHOD_POST = 'POST';
 
-	/**
-	 * @return mixed
-	 */
-	public function getClient();
+    /**
+     * @return ClientInterface
+     */
+    public function getClient();
+
+    /**
+     * @param ClientInterface $client
+     */
+    public function setClient(ClientInterface $client);
 
     /**
      * @param string $method

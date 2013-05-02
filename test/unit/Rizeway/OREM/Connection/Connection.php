@@ -10,7 +10,7 @@ class Connection extends atoum\test
     public function testAll()
     {
         $this
-            ->if($client = new \mock\Client())
+            ->if($client = new \mock\Guzzle\Http\Client())
             ->and($client->getMockController()->createRequest = function() {
                 $request = new \mock\request();
                 $response = new \mock\response();
@@ -36,15 +36,15 @@ class Connection extends atoum\test
     public function testWithParameters()
     {
         $this
-            ->if($client = new \mock\Client())
+            ->if($client = new \mock\Guzzle\Http\Client())
             ->and($client->getMockController()->createRequest = function() {
-                    $request = new \mock\request();
-                    $response = new \mock\response();
-                    $response->getMockController()->json = 'ok';
-                    $request->getMockController()->send = $response;
+                $request = new \mock\request();
+                $response = new \mock\response();
+                $response->getMockController()->json = 'ok';
+                $request->getMockController()->send = $response;
 
-                    return $request;
-                })
+                return $request;
+            })
             ->and($object = new TestedClass($client))
             ->and($result = $object->query('GET', 'resource', null, array('param' => 'a', 'param2' => 'b')))
                 ->mock($client)
@@ -52,6 +52,21 @@ class Connection extends atoum\test
                         ->withArguments('GET', 'resource?param=a&param2=b', array('Content-Type' => 'application/json'), null)
                         ->once()
                 ->string($result)->isEqualTo('ok')
+        ;
+    }
+
+
+    public function testSetClient()
+    {
+        $this
+            ->if($client = new \mock\Guzzle\Http\Client())
+            ->if($client2 = new \mock\Guzzle\Http\Client())
+            ->and($object = new TestedClass($client))
+            ->and($object->setClient($client2))
+            ->then
+                ->object($object->getClient())
+                    ->isIdenticalTo($client2)
+                    ->isNotIdenticalTo($client)
         ;
     }
 }

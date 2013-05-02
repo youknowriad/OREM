@@ -2,6 +2,8 @@
 
 namespace Rizeway\OREM\Connection;
 
+use Guzzle\Http\ClientInterface;
+
 class Connection implements ConnectionInterface
 {
     /**
@@ -12,17 +14,25 @@ class Connection implements ConnectionInterface
     /**
      * @param $client
      */
-    public function __construct($client)
+    public function __construct(ClientInterface $client)
     {
         $this->client = $client;
     }
 
     /**
-     * @return \Guzzle\Service\Client
+     * @return \Guzzle\Http\ClientInterface
      */
     public function getClient()
     {
         return $this->client;
+    }
+
+    /**
+     * @param \Guzzle\Http\ClientInterface $client
+     */
+    public function setClient(ClientInterface $client)
+    {
+        $this->client = $client;
     }
 
     /**
