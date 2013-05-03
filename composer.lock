@@ -1,5 +1,9 @@
 {
-    "hash": "56f241192308bbcdb7fec659bc7ce3aa",
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+    ],
+    "hash": "9f3b8dce2bffa46f77fa1e673c8d1e38",
     "packages": [
         {
             "name": "guzzle/guzzle",
@@ -250,12 +254,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/atoum/atoum.git",
-                "reference": "4e830e430974165c2c6b853c2bf98162ee944afb"
+                "reference": "575a89b334b1fcfb33fc9e8deee1978339ee215d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atoum/atoum/zipball/4e830e430974165c2c6b853c2bf98162ee944afb",
-                "reference": "4e830e430974165c2c6b853c2bf98162ee944afb",
+                "url": "https://api.github.com/repos/atoum/atoum/zipball/575a89b334b1fcfb33fc9e8deee1978339ee215d",
+                "reference": "575a89b334b1fcfb33fc9e8deee1978339ee215d",
                 "shasum": ""
             },
             "require": {
@@ -316,7 +320,7 @@
                 "test",
                 "unit testing"
             ],
-            "time": "2013-04-09 10:37:00"
+            "time": "2013-04-30 08:28:16"
         }
     ],
     "aliases": [
