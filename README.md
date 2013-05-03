@@ -118,7 +118,7 @@ Install using composer
 ```
 {
     "require": {
-        "rizeway/orem": "0.1.x-dev"
+        "rizeway/orem": "0.1.*@dev"
     }
 }
 ```
