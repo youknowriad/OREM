@@ -10,7 +10,14 @@ use atoum;
 class MyEntity {
     private $test;
     public $toto;
-    public function getTest() {
+
+    public function __construct($primary = null)
+    {
+        $this->test = $primary;
+    }
+
+    public function getTest()
+    {
         return $this->test;
     }
 }
@@ -31,6 +38,27 @@ class EntityHelper extends atoum\test
                 ->string($object->getPropertyValue($entity, 'toto'))->isEqualTo('test')
                 ->string($object->getPropertyValue($entity, 'test'))->isEqualTo('value')
                 ->string($object->getPrimaryKey($entity))->isEqualTo('value')
+        ;
+    }
+
+    public function testGetPrimaryKey()
+    {
+        $this
+            ->if($mappingField = new MappingFieldString('test'))
+            ->and($mapping = new MappingEntity(
+                'entity',
+                '\test\unit\Rizeway\OREM\Entity\MyEntity',
+                'test',
+                array('test' => $mappingField),
+                array()
+            ))
+            ->and($object = new TestedClass($mapping))
+            ->and($entity = new \test\unit\Rizeway\OREM\Entity\MyEntity())
+            ->then
+                ->variable($object->getPrimaryKey($entity))->isNull()
+            ->if($entity = new \test\unit\Rizeway\OREM\Entity\MyEntity($primaryKey = uniqid()))
+            ->then()
+                ->string($object->getPrimaryKey($entity))->isEqualTo($primaryKey)
         ;
     }
 }

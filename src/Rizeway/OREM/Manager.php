@@ -8,6 +8,7 @@ use Rizeway\OREM\Repository\Repository;
 use Rizeway\OREM\Connection\ConnectionInterface;
 use Rizeway\OREM\Serializer\Serializer;
 use Rizeway\OREM\Store\Store;
+use Rizeway\OREM\Adapter\Adapter;
 
 class Manager
 {
@@ -32,6 +33,16 @@ class Manager
     protected $store;
 
     /**
+     * @var \Rizeway\OREM\Repository\Repository[]
+     */
+    protected $repositories;
+
+    /**
+     * @var \Rizeway\OREM\Adapter\Adapter[]
+     */
+    protected $adapters;
+
+    /**
      * @param ConnectionInterface $connection
      * @param \Rizeway\OREM\Mapping\MappingEntity[] $mappings
      */
@@ -41,6 +52,9 @@ class Manager
         $this->mappings   = $mappings;
         $this->store      = new Store($mappings);
         $this->serializer = new Serializer($this, $this->store);
+
+        $this->repositories = array();
+        $this->adapters = array();
     }
 
     /**
@@ -50,9 +64,41 @@ class Manager
      */
     public function getRepository($entityName)
     {
-        $this->getMappingForEntity($entityName);
+        if (!isset($this->mappings[$entityName])) {
+            throw new \Exception('Unknown Entity : ' . $entityName);
+        }
 
-        return new Repository($this, $entityName);
+        if(false === isset($this->repositories[$entityName])) {
+            $this->repositories[$entityName] = new Repository($this, $entityName);
+        }
+
+        return $this->repositories[$entityName];
+    }
+
+    /**
+     * @param string $entityName
+     * @return \Rizeway\OREM\Adapter\Adapter
+     * @throws \InvalidArgumentException
+     */
+    public function getAdapter($entityName)
+    {
+        $mapping = $this->getMappingForEntity($entityName);
+
+        if(false === isset($this->adapters[$entityName])) {
+            $class = $mapping->getAdapter();
+
+            if (false === is_subclass_of($class, '\\Rizeway\\OREM\\Adapter\\AdapterInterface')) {
+                throw new \InvalidArgumentException(sprintf(
+                    'Adapter %s of entity %s is not a valid adapter',
+                    $class,
+                    $entityName
+                ));
+            }
+
+            $this->adapters[$entityName] = new $class($this->getMappingForEntity($entityName));
+        }
+
+        return $this->adapters[$entityName];
     }
 
     /**
@@ -94,7 +140,8 @@ class Manager
     public function findQuery($entityName, array $urlParameters = array())
     {
         $mapping = $this->getMappingForEntity($entityName);
-        $results = $this->connection->query(ConnectionInterface::METHOD_GET, $mapping->getResourceUrl(), null, $urlParameters);
+        $results = $this->getAdapter($entityName)->findQuery($this->getConnection(), $urlParameters);
+
         $entities = array();
         foreach ($results as $result) {
             $entities[] = $this->serializer->unserializeEntity($result, $mapping->getName());
@@ -114,7 +161,7 @@ class Manager
         $mapping = $this->getMappingForEntity($entityName);
 
         try {
-            $result = $this->connection->query(ConnectionInterface::METHOD_GET, $mapping->getResourceUrl().'/'.$primaryKeyValue);
+            $result = $this->getAdapter($entityName)->find($this->getConnection(), $primaryKeyValue);
             $entity = $this->serializer->unserializeEntity($result, $mapping->getName());
 
             return $entity;
@@ -139,11 +186,14 @@ class Manager
                 continue;
             }
 
-            $result = $this->connection->query(ConnectionInterface::METHOD_GET, $mapping->getResourceUrl().'/'.$primaryKeyValue.'/'.$relation->getRemoteName());
+            $result = $this->getAdapter($entityName)->findRelation(
+                $this->getConnection(),
+                $relation,
+                $primaryKeyValue,
+                $relationName
+            );
 
-            if(is_null($result) === false) {
-                return $this->serializer->unserializeEntity($result, $relation->getEntityName());
-            }
+            return $this->serializer->unserializeEntity($result, $relation->getEntityName());
         }
 
         foreach($mapping->getHasManyMappings() as $relation) {
@@ -151,7 +201,12 @@ class Manager
                 continue;
             }
 
-            $results = $this->connection->query(ConnectionInterface::METHOD_GET, $mapping->getResourceUrl().'/'.$primaryKeyValue.'/'.$relation->getRemoteName());
+            $results = $this->getAdapter($entityName)->findRelation(
+                $this->getConnection(),
+                $relation,
+                $primaryKeyValue,
+                $relationName
+            );
             $entities = array();
             foreach ($results as $result) {
                 $entities[] = $this->serializer->unserializeEntity($result, $relation->getEntityName());

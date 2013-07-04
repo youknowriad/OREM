@@ -34,6 +34,7 @@ class Parser
                 }
                 $fieldmappings[] = new $classname($fieldname, isset($fieldConfiguration['remote']) ? $fieldConfiguration['remote'] : null);
             }
+
             if (is_null($primaryKey)) {
                 throw new \Exception('A field must be defined as primary key');
             }
@@ -64,7 +65,12 @@ class Parser
 
             $url = isset($entityConfiguration['url']) ? $entityConfiguration['url'] : null;
 
-            $mappings[$name] = new MappingEntity($name, $class, $primaryKey, $fieldmappings, $hasManyMappings, $hasOneMappings, $url);
+            $adapter = null;
+            if (isset($entityConfiguration['adapter'])) {
+                $adapter = $entityConfiguration['adapter'];
+            }
+
+            $mappings[$name] = new MappingEntity($name, $class, $primaryKey, $fieldmappings, $hasManyMappings, $hasOneMappings, $url, $adapter);
         }
 
         return $mappings;
