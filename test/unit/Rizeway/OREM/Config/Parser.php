@@ -204,9 +204,8 @@ class Parser extends atoum\test
                     )
                 ))
             ->then
-                ->array($mappings = $object->parse($config))->hasSize(1)
-                ->object($entityMapping = $mappings['entity'])->isInstanceOf('Rizeway\\OREM\\Mapping\\MappingEntity')
-                ->variable($entityMapping->getPrimaryKey())->isNull()
+                ->exception(function() use($object, $config) { $object->parse($config); })
+                    ->hasMessage('A field must be defined as primary key')
         ;
     }
 

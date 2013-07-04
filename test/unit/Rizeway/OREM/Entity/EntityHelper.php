@@ -59,17 +59,6 @@ class EntityHelper extends atoum\test
             ->if($entity = new \test\unit\Rizeway\OREM\Entity\MyEntity($primaryKey = uniqid()))
             ->then()
                 ->string($object->getPrimaryKey($entity))->isEqualTo($primaryKey)
-            ->if($mapping = new MappingEntity(
-                'entity',
-                '\test\unit\Rizeway\OREM\Entity\MyEntity',
-                null,
-                array('test' => $mappingField),
-                array()
-            ))
-            ->and($object = new TestedClass($mapping))
-            ->and($entity = new \test\unit\Rizeway\OREM\Entity\MyEntity())
-            ->then()
-                ->string($object->getPrimaryKey($entity))->isEqualTo(spl_object_hash($entity))
         ;
     }
 }

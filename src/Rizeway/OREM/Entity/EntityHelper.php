@@ -74,11 +74,7 @@ class EntityHelper
      */
     public function getPrimaryKey($object)
     {
-        try {
-            return $this->getAccessiblePropertyValue($object, $this->mapping->getPrimaryKey());
-        } catch (\ReflectionException $e) {
-            return spl_object_hash($object);
-        }
+        return $this->getAccessiblePropertyValue($object, $this->mapping->getPrimaryKey());
     }
 
     /**

@@ -51,7 +51,7 @@ class Entity
             $primaryKey = $this->__oremManager->getMappingForObject($this)->getPrimaryKey();
 
             $this->$relation = $this->__oremManager->getRepository($this->__oremName)->findRelation(
-                isset($primaryKey) ? $this->$primaryKey : null,
+                $this->$primaryKey,
                 $relation
             );
 

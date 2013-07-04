@@ -35,6 +35,10 @@ class Parser
                 $fieldmappings[] = new $classname($fieldname, isset($fieldConfiguration['remote']) ? $fieldConfiguration['remote'] : null);
             }
 
+            if (is_null($primaryKey)) {
+                throw new \Exception('A field must be defined as primary key');
+            }
+
             $hasManyMappings = array();
             if (isset($entityConfiguration['hasMany'])) {
                 foreach ($entityConfiguration['hasMany'] as $fieldname => $relationConfiguration) {
