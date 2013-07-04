@@ -37,13 +37,7 @@ class Serializer
     public function unserializeEntity(array $serial, $name)
     {
         $mapping = $this->getMappingForEntity($name);
-
-        try {
-            $primaryKey = $serial[$mapping->getRemotePrimaryKey()];
-        } catch (\Exception $e) {
-            $primaryKey = null;
-        }
-
+        $primaryKey = $serial[$mapping->getRemotePrimaryKey()];
         if ($this->store->hasEntity($name, $primaryKey)) {
             $object = $this->store->getEntity($name, $primaryKey);
             $this->updateEntity($object, $serial, $name);
@@ -156,21 +150,21 @@ class Serializer
 
         $entity = unserialize(sprintf('O:%d:"%s":0:{}', strlen($classname), $classname));
 
-		if($entity instanceof Entity) {
-			$entity
-				->__setOremName($name)
-				->__setOremManager($this->manager)
-			;
-		}
+        if($entity instanceof Entity) {
+            $entity
+                ->__setOremName($name)
+                ->__setOremManager($this->manager)
+            ;
+        }
 
-		return $entity;
+        return $entity;
     }
 
-	/**
-	 * @param string $entityName
-	 * @return \Rizeway\OREM\Mapping\MappingEntity
-	 */
-	protected function getMappingForEntity($entityName)
+    /**
+     * @param string $entityName
+     * @return \Rizeway\OREM\Mapping\MappingEntity
+     */
+    protected function getMappingForEntity($entityName)
     {
         return $this->manager->getMappingForEntity($entityName);
     }

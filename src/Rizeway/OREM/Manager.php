@@ -33,12 +33,12 @@ class Manager
     protected $store;
 
     /**
-     * @var \SplObjectStorage
+     * @var \Rizeway\OREM\Repository\Repository[]
      */
     protected $repositories;
 
     /**
-     * @var \SplObjectStorage
+     * @var \Rizeway\OREM\Adapter\Adapter[]
      */
     protected $adapters;
 
@@ -53,8 +53,8 @@ class Manager
         $this->store      = new Store($mappings);
         $this->serializer = new Serializer($this, $this->store);
 
-        $this->repositories = new \SplObjectStorage();
-        $this->adapters = new \SplObjectStorage();
+        $this->repositories = array();
+        $this->adapters = array();
     }
 
     /**
@@ -64,16 +64,15 @@ class Manager
      */
     public function getRepository($entityName)
     {
-        $mapping = $this->getMappingForEntity($entityName);
-
-        if(false === $this->repositories->offsetExists($mapping)) {
-            $this->repositories->offsetSet(
-                $mapping,
-                new Repository($this, $entityName)
-            );
+        if (!isset($this->mappings[$entityName])) {
+            throw new \Exception('Unknown Entity : ' . $entityName);
         }
 
-        return $this->repositories->offsetGet($mapping);
+        if(false === isset($this->repositories[$entityName])) {
+            $this->repositories[$entityName] = new Repository($this, $entityName);
+        }
+
+        return $this->repositories[$entityName];
     }
 
     /**
@@ -85,7 +84,7 @@ class Manager
     {
         $mapping = $this->getMappingForEntity($entityName);
 
-        if(false === $this->adapters->offsetExists($mapping)) {
+        if(false === isset($this->adapters[$entityName])) {
             $class = $mapping->getAdapter();
 
             if (false === is_subclass_of($class, '\\Rizeway\\OREM\\Adapter\\AdapterInterface')) {
@@ -96,13 +95,10 @@ class Manager
                 ));
             }
 
-            $this->adapters->offsetSet(
-                $mapping,
-                new $class($this->getMappingForEntity($entityName))
-            );
+            $this->adapters[$entityName] = new $class($this->getMappingForEntity($entityName));
         }
 
-        return $this->adapters->offsetGet($mapping);
+        return $this->adapters[$entityName];
     }
 
     /**
