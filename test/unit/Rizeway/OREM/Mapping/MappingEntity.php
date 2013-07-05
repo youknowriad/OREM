@@ -21,11 +21,14 @@ class MappingEntity extends atoum\test
                 ->array($object->getHasManyMappings())->isEqualTo(array())
                 ->array($object->getHasOneMappings())->isEqualTo(array())
                 ->string($object->getResourceUrl())->isEqualTo('name')
+                ->string($object->getAdapter())->isEqualTo('\\Rizeway\OREM\Adapter\Adapter')
                 ->exception(function() use ($object) { $object->getRemotePrimaryKey(); })
                     ->hasMessage('No mapping found for primary Key in entity : name')
-            ->if($object = new TestedClass('name', 'class', 'test', array(), array(), array(), 'url'))
+            ->if($adapter = '\\Dummy\\Rizeway\\OREM\\Adapter\\Adapter')
+            ->and($object = new TestedClass('name', 'class', 'test', array(), array(), array(), 'url', $adapter))
             ->then()
                 ->string($object->getResourceUrl())->isEqualTo('url')
+                ->string($object->getAdapter())->isEqualTo($adapter)
         ;
     }
 
@@ -34,7 +37,7 @@ class MappingEntity extends atoum\test
         $this
             ->if($object = new TestedClass('name', 'class', 'test', array(new MappingFieldString('test', 'test2')), array()))
             ->then
-                ->string($object->getRemotePrimaryKey('test2'))
+                ->string($object->getRemotePrimaryKey())->isEqualTo('test2')
         ;
 
     }

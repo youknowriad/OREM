@@ -41,6 +41,11 @@ class MappingEntity
     protected $url;
 
     /**
+     * @var string
+     */
+    protected $adapter;
+
+    /**
      * @param string $name
      * @param string $classname
      * @param string $primaryKey
@@ -48,9 +53,10 @@ class MappingEntity
      * @param \Rizeway\OREM\Mapping\Relation\MappingRelationInterface[] $hasManyMappings
      * @param \Rizeway\OREM\Mapping\Relation\MappingRelationInterface[] $hasOneMappings
      * @param string $url
+     * @param string $adapter
      */
     public function __construct($name, $classname, $primaryKey, $fieldMappings,
-        $hasManyMappings = array(), $hasOneMappings = array(), $url = null)
+        $hasManyMappings = array(), $hasOneMappings = array(), $url = null, $adapter = null)
     {
         $this->name            = $name;
         $this->classname       = $classname;
@@ -59,6 +65,7 @@ class MappingEntity
         $this->hasManyMappings = $hasManyMappings;
         $this->hasOneMappings  = $hasOneMappings;
         $this->url             = $url;
+        $this->adapter         = $adapter ?: '\\Rizeway\\OREM\\Adapter\\Adapter';
     }
 
     /**
@@ -112,7 +119,7 @@ class MappingEntity
     public function getRemotePrimaryKey()
     {
         foreach ($this->fieldMappings as $mapping) {
-            if ($mapping->getFieldName() == $this->getPrimaryKey()) {
+            if ($mapping->getFieldName() === $this->getPrimaryKey()) {
                 return $mapping->getRemoteName();
             }
         }
@@ -126,5 +133,13 @@ class MappingEntity
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAdapter()
+    {
+        return $this->adapter;
     }
 }

@@ -208,4 +208,27 @@ class Parser extends atoum\test
                     ->hasMessage('A field must be defined as primary key')
         ;
     }
+
+    public function testHasAdapter()
+    {
+        $this
+            ->if($object = new TestedClass())
+            ->and($config = array(
+                    'entity' => array(
+                        'class' => '\mock\test',
+                        'adapter' => '\mock\adapter',
+                        'fields' => array(
+                            'toto' => array(
+                                'primaryKey' => true,
+                                'type' => 'string'
+                            )
+                        )
+                    )
+                ))
+            ->then
+                ->array($mappings = $object->parse($config))->hasSize(1)
+                ->object($entityMapping = $mappings['entity'])->isInstanceOf('Rizeway\\OREM\\Mapping\\MappingEntity')
+                ->string($entityMapping->getAdapter())->isEqualTo('\mock\adapter')
+        ;
+    }
 }
