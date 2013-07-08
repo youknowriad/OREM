@@ -55,7 +55,7 @@ class Connection implements ConnectionInterface
      * @param array $urlParameters
      * @return string
      */
-    protected function getQueryUrl($urlParameters = array())
+    protected function getQueryUrl(array $urlParameters = array())
     {
         if (!count($urlParameters)) {
             return '';

@@ -3,7 +3,6 @@
 namespace Rizeway\OREM\Store;
 
 use Rizeway\OREM\Entity\EntityHelper;
-use Rizeway\OREM\Manager;
 
 class Store
 {

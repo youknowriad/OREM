@@ -53,8 +53,10 @@ class Repository
         return $this->manager->findQuery($this->name, $urlParameters);
     }
 
-    /** @param $id
-     * @return object|null
+    /**
+     * @param $id
+     * @param $relation
+     * @return array|object
      */
     public function findRelation($id, $relation)
     {

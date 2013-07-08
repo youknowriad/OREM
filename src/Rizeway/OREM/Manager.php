@@ -95,7 +95,10 @@ class Manager
                 ));
             }
 
-            $this->adapters[$entityName] = new $class($this->getMappingForEntity($entityName));
+            $this->adapters[$entityName] = new $class();
+            $this->adapters[$entityName]->setMappingEntity($this->getMappingForEntity($entityName));
+            $this->adapters[$entityName]->setSerializer($this->serializer);
+            $this->adapters[$entityName]->setConnection($this->connection);
         }
 
         return $this->adapters[$entityName];
@@ -107,11 +110,8 @@ class Manager
     public function persist($object)
     {
         $mapping = $this->getMappingForObject($object);
-        $result = $this->connection->query(
-            ConnectionInterface::METHOD_POST,
-            $mapping->getResourceUrl(),
-            $this->serializer->serializeEntity($object, $mapping->getName())
-        );
+        $result = $this->getAdapter($mapping->getName())->persist($object);
+
         $this->serializer->updateEntity($object, $result, $mapping->getName());
     }
 
@@ -121,12 +121,7 @@ class Manager
     public function update($object)
     {
         $mapping = $this->getMappingForObject($object);
-        $helper = new EntityHelper($mapping);
-        $result = $this->connection->query(
-            ConnectionInterface::METHOD_PUT,
-            $mapping->getResourceUrl().'/'.$helper->getPrimaryKey($object),
-            $this->serializer->serializeEntity($object, $mapping->getName())
-        );
+        $result = $this->getAdapter($mapping->getName())->update($object);
 
         $this->serializer->updateEntity($object, $result, $mapping->getName());
     }
@@ -140,8 +135,7 @@ class Manager
     public function findQuery($entityName, array $urlParameters = array())
     {
         $mapping = $this->getMappingForEntity($entityName);
-        $results = $this->getAdapter($entityName)->findQuery($this->getConnection(), $urlParameters);
-
+        $results = $this->getAdapter($entityName)->findQuery($urlParameters);
         $entities = array();
         foreach ($results as $result) {
             $entities[] = $this->serializer->unserializeEntity($result, $mapping->getName());
@@ -161,7 +155,7 @@ class Manager
         $mapping = $this->getMappingForEntity($entityName);
 
         try {
-            $result = $this->getAdapter($entityName)->find($this->getConnection(), $primaryKeyValue);
+            $result = $this->getAdapter($entityName)->find($primaryKeyValue);
             $entity = $this->serializer->unserializeEntity($result, $mapping->getName());
 
             return $entity;
@@ -187,7 +181,6 @@ class Manager
             }
 
             $result = $this->getAdapter($entityName)->findRelation(
-                $this->getConnection(),
                 $relation,
                 $primaryKeyValue,
                 $relationName
@@ -202,7 +195,6 @@ class Manager
             }
 
             $results = $this->getAdapter($entityName)->findRelation(
-                $this->getConnection(),
                 $relation,
                 $primaryKeyValue,
                 $relationName

@@ -8,7 +8,6 @@ use Rizeway\OREM\Mapping\Relation\MappingRelationHasMany;
 use Rizeway\OREM\Mapping\Relation\MappingRelationHasOne;
 use Rizeway\OREM\Mapping\Field\MappingFieldString;
 use Rizeway\OREM\Mapping\MappingEntity;
-use Rizeway\OREM\Connection\ConnectionInterface;
 use Rizeway\OREM\Adapter\Adapter as TestedClass;
 
 class Adapter extends atoum

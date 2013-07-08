@@ -20,8 +20,9 @@ class Serializer
     protected $store;
 
     /**
-     * @param \Rizeway\OREM\Mapping\MappingEntity[] $mappings
+     * @param \Rizeway\OREM\Manager $manager
      * @param Store $store
+     * @internal param \Rizeway\OREM\Mapping\MappingEntity[] $mappings
      */
     public function __construct(Manager $manager, Store $store)
     {
