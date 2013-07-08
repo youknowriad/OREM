@@ -37,9 +37,8 @@ class Adapter implements AdapterInterface {
     }
 
     /**
-     * @param ConnectionInterface $connection
      * @param array $urlParameters
-     * @return array|bool|float|int|string
+     * @return mixed
      */
     public function findQuery(array $urlParameters = array())
     {
@@ -52,9 +51,8 @@ class Adapter implements AdapterInterface {
     }
 
     /**
-     * @param ConnectionInterface $connection
      * @param $primaryKeyValue
-     * @return array|bool|float|int|string
+     * @return mixed
      * @throws \Exception
      */
     public function find($primaryKeyValue)
@@ -70,10 +68,9 @@ class Adapter implements AdapterInterface {
     }
 
     /**
-     * @param ConnectionInterface $connection
      * @param MappingRelationInterface $relation
      * @param $primaryKeyValue
-     * @return array|bool|float|int|string
+     * @return mixed
      * @throws \Exception
      */
     public function findRelation(MappingRelationInterface $relation, $primaryKeyValue)
@@ -122,5 +119,18 @@ class Adapter implements AdapterInterface {
             $this->mapping->getResourceUrl().'/'.$helper->getPrimaryKey($object),
             $this->serializer->serializeEntity($object, $this->mapping->getName())
         );
+    }
+
+    /**
+     * @param $object
+     * @return mixed
+     */
+    public function remove($object)
+    {
+        $mapping = $this->getMappingForObject($object);
+        $helper = new EntityHelper($mapping);
+        
+        return $this->connection->query(ConnectionInterface::METHOD_DELETE, $mapping->getResourceUrl().'/'.
+            $helper->getPrimaryKey($object));
     }
 }

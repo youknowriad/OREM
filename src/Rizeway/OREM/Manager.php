@@ -2,7 +2,6 @@
 
 namespace Rizeway\OREM;
 
-use Rizeway\OREM\Entity\EntityHelper;
 use Rizeway\OREM\Exception\ExceptionNotFound;
 use Rizeway\OREM\Repository\Repository;
 use Rizeway\OREM\Connection\ConnectionInterface;
@@ -231,9 +230,7 @@ class Manager
     public function remove($object)
     {
         $mapping = $this->getMappingForObject($object);
-        $helper = new EntityHelper($mapping);
-        $this->connection->query(ConnectionInterface::METHOD_DELETE, $mapping->getResourceUrl().'/'.
-            $helper->getPrimaryKey($object));
+        $this->getAdapter($mapping->getName())->remove($object);
         $this->store->removeEntity($object);
     }
 
