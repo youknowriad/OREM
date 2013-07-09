@@ -2,12 +2,14 @@
 namespace Rizeway\OREM\Adapter;
 
 use Rizeway\OREM\Connection\Connection;
+use Rizeway\OREM\Entity\EntityHelper;
 use Rizeway\OREM\Mapping\MappingEntity;
 use Rizeway\OREM\Connection\ConnectionInterface;
 use Rizeway\OREM\Mapping\Relation\MappingRelationInterface;
 use Rizeway\OREM\Serializer\Serializer;
 
-class Adapter implements AdapterInterface {
+class Adapter implements AdapterInterface
+{
     protected $mapping;
     protected $serializer;
     protected $connection;
