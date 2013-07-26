@@ -2,6 +2,7 @@
 
 namespace Rizeway\OREM\Config;
 
+use Symfony\Component\Finder\Adapter\PhpAdapter;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
@@ -28,8 +29,9 @@ class Loader
         $config = array();
         $finder = new Finder();
         $iterator = $finder->files('*.orem.yml')->depth(0)->in($this->directory);
+
         foreach ($iterator as $file) {
-            $config[substr($file->getFilename(), 0, -9)] = Yaml::parse($file->getRealpath());
+            $config[basename($file->getFilename(), '.orem.yml')] = Yaml::parse($file->getPathname());
         }
 
         return $config;
