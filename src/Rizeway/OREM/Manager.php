@@ -135,6 +135,7 @@ class Manager
     {
         $mapping = $this->getMappingForEntity($entityName);
         $results = $this->getAdapter($entityName)->findQuery($urlParameters);
+
         $entities = array();
         foreach ($results as $result) {
             $entities[] = $this->serializer->unserializeEntity($result, $mapping->getName());

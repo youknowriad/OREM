@@ -33,7 +33,7 @@ class Adapter implements AdapterInterface
     /**
      * @param Connection $connection
      */
-    public function setConnection(Connection $connection)
+    public function setConnection(ConnectionInterface $connection)
     {
         $this->connection = $connection;
     }
@@ -118,7 +118,7 @@ class Adapter implements AdapterInterface
 
         return $this->connection->query(
             ConnectionInterface::METHOD_PUT,
-            $this->mapping->getResourceUrl().'/'.$helper->getPrimaryKey($object),
+            $this->mapping->getResourceUrl() . '/' . $helper->getPrimaryKey($object),
             $this->serializer->serializeEntity($object, $this->mapping->getName())
         );
     }
@@ -129,10 +129,13 @@ class Adapter implements AdapterInterface
      */
     public function remove($object)
     {
-        $mapping = $this->getMappingForObject($object);
-        $helper = new EntityHelper($mapping);
+        if (is_null($this->mapping->getPrimaryKey())) {
+            throw new \Exception('A field must be defined as primary key');
+        }
+
+        $helper = new EntityHelper($this->mapping);
         
-        return $this->connection->query(ConnectionInterface::METHOD_DELETE, $mapping->getResourceUrl().'/'.
+        return $this->connection->query(ConnectionInterface::METHOD_DELETE, $this->mapping->getResourceUrl().'/'.
             $helper->getPrimaryKey($object));
     }
 }

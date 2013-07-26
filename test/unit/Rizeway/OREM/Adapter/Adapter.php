@@ -4,11 +4,14 @@ namespace test\unit\Rizeway\OREM\Adapter;
 
 use atoum;
 use Rizeway\OREM\Exception\ExceptionNotFound;
+use Rizeway\OREM\Manager;
+use Rizeway\OREM\Store\Store;
 use Rizeway\OREM\Mapping\Relation\MappingRelationHasMany;
 use Rizeway\OREM\Mapping\Relation\MappingRelationHasOne;
 use Rizeway\OREM\Mapping\Field\MappingFieldString;
 use Rizeway\OREM\Mapping\MappingEntity;
 use Rizeway\OREM\Adapter\Adapter as TestedClass;
+use Rizeway\OREM\Serializer\Serializer;
 
 class Adapter extends atoum
 {
@@ -39,9 +42,13 @@ class Adapter extends atoum
             ))
             ->and($mappingField = new MappingFieldString('test'))
             ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', 'test', array('test' => $mappingField), array()))
-            ->and($object = new TestedClass($mapping))
+            ->and($serializer = new Serializer(new Manager($connection, array('entity' => $mapping)), new Store(array('entity' => $mapping))))
+            ->and($object = new TestedClass())
+            ->and($object->setMappingEntity($mapping))
+            ->and($object->setSerializer($serializer))
+            ->and($object->setConnection($connection))
             ->then
-                ->array($entity = $object->findQuery($connection))->isIdenticalTo($response)
+                ->array($entity = $object->findQuery())->isIdenticalTo($response)
                 ->mock($connection)
                     ->call('query')
                     ->withArguments('GET', 'entity', array())
@@ -56,9 +63,13 @@ class Adapter extends atoum
             ->and($connection->getMockController()->query = $response = array('test' => 'id'))
             ->and($mappingField = new MappingFieldString('test'))
             ->and($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', 'test', array('test' => $mappingField), array()))
-            ->and($object = new TestedClass($mapping))
+            ->and($serializer = new Serializer(new Manager($connection, array('entity' => $mapping)), new Store(array('entity' => $mapping))))
+            ->and($object = new TestedClass())
+            ->and($object->setMappingEntity($mapping))
+            ->and($object->setSerializer($serializer))
+            ->and($object->setConnection($connection))
             ->then
-                ->array($entity = $object->find($connection, 'id'))->isIdenticalTo($response)
+                ->array($entity = $object->find('id'))->isIdenticalTo($response)
                 ->mock($connection)
                     ->call('query')
                     ->withArguments('GET', 'entity/id', array())
@@ -76,19 +87,27 @@ class Adapter extends atoum
                 array(),
                 array($mappingRelation)
             ))
-            ->and($object = new TestedClass($mapping))
+            ->and($serializer = new Serializer(new Manager($connection, array('entity' => $mapping)), new Store(array('entity' => $mapping))))
+            ->and($object = new TestedClass())
+            ->and($object->setMappingEntity($mapping))
+            ->and($object->setSerializer($serializer))
+            ->and($object->setConnection($connection))
             ->then
-                ->array($object->find($connection, 'id'))->isIdenticalTo($response)
+                ->array($object->find('id'))->isIdenticalTo($response)
                 ->mock($connection)
                     ->call('query')->withArguments('GET', 'entity/id', array())->once()
 
             ->if($connection->getMockController()->query->throw = $exception = new ExceptionNotFound('test', 404))
             ->then
-                ->exception(function() use ($object, $connection) { $object->find($connection, 'id'); })->isIdenticalTo($exception)
+                ->exception(function() use ($object, $connection) { $object->find('id'); })->isIdenticalTo($exception)
             ->if($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', null, array('test' => $mappingField), array()))
-            ->and($object = new TestedClass($mapping))
+            ->and($serializer = new Serializer(new Manager($connection, array('entity' => $mapping)), new Store(array('entity' => $mapping))))
+            ->and($object = new TestedClass())
+            ->and($object->setMappingEntity($mapping))
+            ->and($object->setSerializer($serializer))
+            ->and($object->setConnection($connection))
             ->then
-                ->exception(function() use($object, $connection) { $object->find($connection, 'id'); })
+                ->exception(function() use($object, $connection) { $object->find('id'); })
                     ->hasMessage('A field must be defined as primary key')
         ;
     }
@@ -107,7 +126,11 @@ class Adapter extends atoum
                 array(),
                 array()
             ))
-            ->and($object = new TestedClass($mapping))
+            ->and($serializer = new Serializer(new Manager($connection, array('entity' => $mapping)), new Store(array('entity' => $mapping))))
+            ->and($object = new TestedClass())
+            ->and($object->setMappingEntity($mapping))
+            ->and($object->setSerializer($serializer))
+            ->and($object->setConnection($connection))
             ->and($mapping = new MappingEntity(
                 'entity',
                 '\test\unit\Rizeway\OREM\MyEntity',
@@ -119,9 +142,13 @@ class Adapter extends atoum
                     $relation = new MappingRelationHasOne('related', 'relation', null, true)
                 )
             ))
-            ->and($object = new TestedClass($mapping))
+            ->and($serializer = new Serializer(new Manager($connection, array('entity' => $mapping)), new Store(array('entity' => $mapping))))
+            ->and($object = new TestedClass())
+            ->and($object->setMappingEntity($mapping))
+            ->and($object->setSerializer($serializer))
+            ->and($object->setConnection($connection))
             ->then
-                ->array($object->findRelation($connection, $relation, 'id'))->hasSize(1)
+                ->array($object->findRelation($relation, 'id'))->hasSize(1)
                 ->mock($connection)
                     ->call('query')->withArguments('GET', 'entity/id/relation', array())->once()
 
@@ -138,9 +165,13 @@ class Adapter extends atoum
                 ),
                 array()
             ))
-            ->and($object = new TestedClass($mapping))
+            ->and($serializer = new Serializer(new Manager($connection, array('entity' => $mapping)), new Store(array('entity' => $mapping))))
+            ->and($object = new TestedClass())
+            ->and($object->setMappingEntity($mapping))
+            ->and($object->setSerializer($serializer))
+            ->and($object->setConnection($connection))
             ->then
-                ->array($result = $object->findRelation($connection, $relation, 'id'))->hasSize(1)
+                ->array($result = $object->findRelation($relation, 'id'))->hasSize(1)
                 ->array($result[0])->isEqualTo(array('test' => 'id'))
                 ->mock($connection)
                     ->call('query')->withArguments('GET', 'entity/id/relation', array())->once()
@@ -155,9 +186,13 @@ class Adapter extends atoum
                 ),
                 array()
             ))
-            ->and($object = new TestedClass($mapping))
+            ->and($serializer = new Serializer(new Manager($connection, array('entity' => $mapping)), new Store(array('entity' => $mapping))))
+            ->and($object = new TestedClass())
+            ->and($object->setMappingEntity($mapping))
+            ->and($object->setSerializer($serializer))
+            ->and($object->setConnection($connection))
             ->then
-                ->exception(function() use($object, $connection, $relation) { $object->findRelation($connection, $relation, 'id'); })
+                ->exception(function() use($object, $connection, $relation) { $object->findRelation($relation, 'id'); })
                     ->hasMessage('A field must be defined as primary key')
         ;
     }
