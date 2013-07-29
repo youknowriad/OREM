@@ -42,7 +42,7 @@ class Manager
     protected $adapters;
 
     /**
-     * @param ConnectionInterface $connection
+     * @param ConnectionInterface                   $connection
      * @param \Rizeway\OREM\Mapping\MappingEntity[] $mappings
      */
     public function __construct(ConnectionInterface $connection, array $mappings)
@@ -57,7 +57,7 @@ class Manager
     }
 
     /**
-     * @param string $entityName
+     * @param  string     $entityName
      * @return Repository
      * @throws \Exception
      */
@@ -67,7 +67,7 @@ class Manager
             throw new \Exception('Unknown Entity : ' . $entityName);
         }
 
-        if(false === isset($this->repositories[$entityName])) {
+        if (false === isset($this->repositories[$entityName])) {
             $this->repositories[$entityName] = new Repository($this, $entityName);
         }
 
@@ -75,7 +75,7 @@ class Manager
     }
 
     /**
-     * @param string $entityName
+     * @param  string                        $entityName
      * @return \Rizeway\OREM\Adapter\Adapter
      * @throws \InvalidArgumentException
      */
@@ -83,7 +83,7 @@ class Manager
     {
         $mapping = $this->getMappingForEntity($entityName);
 
-        if(false === isset($this->adapters[$entityName])) {
+        if (false === isset($this->adapters[$entityName])) {
             $class = $mapping->getAdapter();
 
             if (false === is_subclass_of($class, '\\Rizeway\\OREM\\Adapter\\AdapterInterface')) {
@@ -126,8 +126,8 @@ class Manager
     }
 
     /**
-     * @param string $entityName
-     * @param string[] $urlParameters
+     * @param  string     $entityName
+     * @param  string[]   $urlParameters
      * @return object[]
      * @throws \Exception
      */
@@ -145,8 +145,8 @@ class Manager
     }
 
     /**
-     * @param string $entityName
-     * @param mixed $primaryKeyValue
+     * @param  string      $entityName
+     * @param  mixed       $primaryKeyValue
      * @return object|null
      * @throws \Exception
      */
@@ -159,15 +159,15 @@ class Manager
             $entity = $this->serializer->unserializeEntity($result, $mapping->getName());
 
             return $entity;
-        } catch(ExceptionNotFound $e) {
+        } catch (ExceptionNotFound $e) {
             return null;
         }
     }
 
     /**
-     * @param string $entityName
-     * @param mixed $primaryKeyValue
-     * @param string $relationName
+     * @param  string                    $entityName
+     * @param  mixed                     $primaryKeyValue
+     * @param  string                    $relationName
      * @return object|array
      * @throws \InvalidArgumentException
      */
@@ -175,8 +175,8 @@ class Manager
     {
         $mapping = $this->getMappingForEntity($entityName);
 
-        foreach($mapping->getHasOneMappings() as $relation) {
-            if($relation->getFieldName() !== $relationName || $relation->isLazy() === false) {
+        foreach ($mapping->getHasOneMappings() as $relation) {
+            if ($relation->getFieldName() !== $relationName || $relation->isLazy() === false) {
                 continue;
             }
 
@@ -189,8 +189,8 @@ class Manager
             return $this->serializer->unserializeEntity($result, $relation->getEntityName());
         }
 
-        foreach($mapping->getHasManyMappings() as $relation) {
-            if($relation->getFieldName() !== $relationName || $relation->isLazy() === false) {
+        foreach ($mapping->getHasManyMappings() as $relation) {
+            if ($relation->getFieldName() !== $relationName || $relation->isLazy() === false) {
                 continue;
             }
 
@@ -225,7 +225,7 @@ class Manager
     }
 
     /**
-     * @param object $object
+     * @param  object     $object
      * @throws \Exception
      */
     public function remove($object)
@@ -251,11 +251,11 @@ class Manager
         throw new \Exception('No Mapping Entity found for class : '. get_class($object));
     }
 
-	/**
-	 * @return Connection\ConnectionInterface
-	 */
-	public function getConnection()
-	{
-		return $this->connection;
-	}
+    /**
+     * @return Connection\ConnectionInterface
+     */
+    public function getConnection()
+    {
+        return $this->connection;
+    }
 }

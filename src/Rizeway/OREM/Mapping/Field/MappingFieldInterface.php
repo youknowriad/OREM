@@ -7,13 +7,13 @@ use Rizeway\OREM\Mapping\MappingInterface;
 interface MappingFieldInterface extends MappingInterface
 {
     /**
-     * @param mixed $value
+     * @param  mixed $value
      * @return mixed
      */
     public function serializeField($value);
 
     /**
-     * @param mixed $value
+     * @param  mixed $value
      * @return mixed
      */
     public function unserializeField($value);

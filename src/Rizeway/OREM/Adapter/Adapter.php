@@ -39,7 +39,7 @@ class Adapter implements AdapterInterface
     }
 
     /**
-     * @param array $urlParameters
+     * @param  array $urlParameters
      * @return mixed
      */
     public function findQuery(array $urlParameters = array())
@@ -134,7 +134,7 @@ class Adapter implements AdapterInterface
         }
 
         $helper = new EntityHelper($this->mapping);
-        
+
         return $this->connection->query(ConnectionInterface::METHOD_DELETE, $this->mapping->getResourceUrl().'/'.
             $helper->getPrimaryKey($object));
     }

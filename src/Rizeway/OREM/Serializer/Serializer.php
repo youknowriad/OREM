@@ -21,7 +21,7 @@ class Serializer
 
     /**
      * @param \Rizeway\OREM\Manager $manager
-     * @param Store $store
+     * @param Store                 $store
      * @internal param \Rizeway\OREM\Mapping\MappingEntity[] $mappings
      */
     public function __construct(Manager $manager, Store $store)
@@ -31,8 +31,8 @@ class Serializer
     }
 
     /**
-     * @param array $serial
-     * @param string $name
+     * @param  array  $serial
+     * @param  string $name
      * @return object
      */
     public function unserializeEntity(array $serial, $name)
@@ -52,8 +52,8 @@ class Serializer
     }
 
     /**
-     * @param object $object
-     * @param string $name
+     * @param  object     $object
+     * @param  string     $name
      * @return array
      * @throws \Exception
      */
@@ -68,7 +68,7 @@ class Serializer
         }
 
         foreach ($mapping->getHasManyMappings() as $relationMapping) {
-            if($relationMapping->isLazy()) {
+            if ($relationMapping->isLazy()) {
                 continue;
             }
 
@@ -140,7 +140,7 @@ class Serializer
     }
 
     /**
-     * @param string $name
+     * @param  string $name
      * @return object
      */
     protected function constructEntity($name)
@@ -150,7 +150,7 @@ class Serializer
 
         $entity = unserialize(sprintf('O:%d:"%s":0:{}', strlen($classname), $classname));
 
-        if($entity instanceof Entity) {
+        if ($entity instanceof Entity) {
             $entity
                 ->__setOremName($name)
                 ->__setOremManager($this->manager)
@@ -161,7 +161,7 @@ class Serializer
     }
 
     /**
-     * @param string $entityName
+     * @param  string                              $entityName
      * @return \Rizeway\OREM\Mapping\MappingEntity
      */
     protected function getMappingForEntity($entityName)

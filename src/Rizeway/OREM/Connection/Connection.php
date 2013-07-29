@@ -36,10 +36,10 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param string $method
-     * @param string $resource
-     * @param array  $content
-     * @param array  $urlParameters
+     * @param  string                      $method
+     * @param  string                      $resource
+     * @param  array                       $content
+     * @param  array                       $urlParameters
      * @return array|bool|float|int|string
      */
     public function query($method, $resource, $content = null, array $urlParameters = array())
@@ -52,7 +52,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param array $urlParameters
+     * @param  array  $urlParameters
      * @return string
      */
     protected function getQueryUrl(array $urlParameters = array())
