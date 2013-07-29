@@ -1,22 +1,50 @@
 <?php
 namespace Rizeway\OREM\Adapter;
 
+use Rizeway\OREM\Connection\Connection;
+use Rizeway\OREM\Entity\EntityHelper;
 use Rizeway\OREM\Mapping\MappingEntity;
 use Rizeway\OREM\Connection\ConnectionInterface;
 use Rizeway\OREM\Mapping\Relation\MappingRelationInterface;
-use Rizeway\OREM\Mapping\Relation\MappingRelationHasOne;
-use Rizeway\OREM\Mapping\Relation\MappingRelationHasMany;
+use Rizeway\OREM\Serializer\Serializer;
 
-class Adapter implements AdapterInterface {
+class Adapter implements AdapterInterface
+{
     protected $mapping;
+    protected $serializer;
+    protected $connection;
 
-    function __construct(MappingEntity $mapping) {
+    /**
+     * @param MappingEntity $mapping
+     */
+    public function setMappingEntity(MappingEntity $mapping)
+    {
         $this->mapping = $mapping;
     }
 
-    public function findQuery(ConnectionInterface $connection, array $urlParameters = array())
+    /**
+     * @param Serializer $serializer
+     */
+    public function setSerializer(Serializer $serializer)
     {
-        return $connection->query(
+        $this->serializer = $serializer;
+    }
+
+    /**
+     * @param Connection $connection
+     */
+    public function setConnection(ConnectionInterface $connection)
+    {
+        $this->connection = $connection;
+    }
+
+    /**
+     * @param  array $urlParameters
+     * @return mixed
+     */
+    public function findQuery(array $urlParameters = array())
+    {
+        return $this->connection->query(
             ConnectionInterface::METHOD_GET,
             $this->mapping->getResourceUrl(),
             null,
@@ -24,27 +52,90 @@ class Adapter implements AdapterInterface {
         );
     }
 
-    public function find(ConnectionInterface $connection, $primaryKeyValue)
+    /**
+     * @param $primaryKeyValue
+     * @return mixed
+     * @throws \Exception
+     */
+    public function find($primaryKeyValue)
     {
         if (is_null($this->mapping->getPrimaryKey())) {
             throw new \Exception('A field must be defined as primary key');
         }
 
-        return $connection->query(
+        return $this->connection->query(
             ConnectionInterface::METHOD_GET,
             $this->mapping->getResourceUrl().'/'.$primaryKeyValue
         );
     }
 
-    public function findRelation(ConnectionInterface $connection, MappingRelationInterface $relation, $primaryKeyValue)
+    /**
+     * @param MappingRelationInterface $relation
+     * @param $primaryKeyValue
+     * @return mixed
+     * @throws \Exception
+     */
+    public function findRelation(MappingRelationInterface $relation, $primaryKeyValue)
     {
         if (is_null($this->mapping->getPrimaryKey())) {
             throw new \Exception('A field must be defined as primary key');
         }
 
-        return $connection->query(
+        return $this->connection->query(
             ConnectionInterface::METHOD_GET,
             $this->mapping->getResourceUrl().'/'.$primaryKeyValue.'/'.$relation->getRemoteName()
         );
+    }
+
+    /**
+     * @param $object
+     * @throws \Exception
+     */
+    public function persist($object)
+    {
+        if (is_null($this->mapping->getPrimaryKey())) {
+            throw new \Exception('A field must be defined as primary key');
+        }
+
+        return $this->connection->query(
+            ConnectionInterface::METHOD_POST,
+            $this->mapping->getResourceUrl(),
+            $this->serializer->serializeEntity($object, $this->mapping->getName())
+        );
+    }
+
+    /**
+     * @param $object
+     * @throws \Exception
+     */
+    public function update($object)
+    {
+        if (is_null($this->mapping->getPrimaryKey())) {
+            throw new \Exception('A field must be defined as primary key');
+        }
+
+        $helper = new EntityHelper($this->mapping);
+
+        return $this->connection->query(
+            ConnectionInterface::METHOD_PUT,
+            $this->mapping->getResourceUrl() . '/' . $helper->getPrimaryKey($object),
+            $this->serializer->serializeEntity($object, $this->mapping->getName())
+        );
+    }
+
+    /**
+     * @param $object
+     * @return mixed
+     */
+    public function remove($object)
+    {
+        if (is_null($this->mapping->getPrimaryKey())) {
+            throw new \Exception('A field must be defined as primary key');
+        }
+
+        $helper = new EntityHelper($this->mapping);
+
+        return $this->connection->query(ConnectionInterface::METHOD_DELETE, $this->mapping->getResourceUrl().'/'.
+            $helper->getPrimaryKey($object));
     }
 }

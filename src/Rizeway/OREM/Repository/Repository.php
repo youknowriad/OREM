@@ -2,7 +2,6 @@
 
 namespace Rizeway\OREM\Repository;
 
-
 use Rizeway\OREM\Manager;
 
 class Repository
@@ -19,7 +18,7 @@ class Repository
 
     /**
      * @param Manager $manager
-     * @param string $name
+     * @param string  $name
      */
     public function __construct(Manager $manager, $name)
     {
@@ -45,7 +44,7 @@ class Repository
     }
 
     /**
-     * @param array $urlParameters
+     * @param  array     $urlParameters
      * @return \object[]
      */
     public function findQuery($urlParameters = array())
@@ -53,8 +52,10 @@ class Repository
         return $this->manager->findQuery($this->name, $urlParameters);
     }
 
-    /** @param $id
-     * @return object|null
+    /**
+     * @param $id
+     * @param $relation
+     * @return array|object
      */
     public function findRelation($id, $relation)
     {

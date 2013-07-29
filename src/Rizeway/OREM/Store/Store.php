@@ -3,7 +3,6 @@
 namespace Rizeway\OREM\Store;
 
 use Rizeway\OREM\Entity\EntityHelper;
-use Rizeway\OREM\Manager;
 
 class Store
 {
@@ -48,8 +47,8 @@ class Store
     }
 
     /**
-     * @param string $name
-     * @param string $primaryKey
+     * @param  string     $name
+     * @param  string     $primaryKey
      * @return object
      * @throws \Exception
      */
@@ -63,15 +62,14 @@ class Store
     }
 
     /**
-     * @param string $name
-     * @param string $primaryKey
+     * @param  string $name
+     * @param  string $primaryKey
      * @return bool
      */
     public function hasEntity($name, $primaryKey)
     {
         return isset($this->entities[$name]) && isset($this->entities[$name][$primaryKey]);
     }
-
 
     /**
      * @param $object

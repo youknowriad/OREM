@@ -1,11 +1,14 @@
 <?php
 namespace Rizeway\OREM\Adapter;
 
-use Rizeway\OREM\Connection\ConnectionInterface;
 use Rizeway\OREM\Mapping\Relation\MappingRelationInterface;
 
-interface AdapterInterface {
-    function findQuery(ConnectionInterface $connection, array $urlParameters = array());
-    function find(ConnectionInterface $connection, $primaryKeyValue);
-    function findRelation(ConnectionInterface $connection, MappingRelationInterface $relation, $primaryKeyValue);
+interface AdapterInterface
+{
+    public function findQuery(array $urlParameters = array());
+    public function find($primaryKeyValue);
+    public function findRelation(MappingRelationInterface $relation, $primaryKeyValue);
+    public function persist($object);
+    public function update($object);
+    public function remove($object);
 }

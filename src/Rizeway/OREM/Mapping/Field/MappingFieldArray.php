@@ -5,7 +5,7 @@ namespace Rizeway\OREM\Mapping\Field;
 class MappingFieldArray extends MappingField implements MappingFieldInterface
 {
     /**
-     * @param mixed $value
+     * @param  mixed $value
      * @return mixed
      */
     public function serializeField($value)
@@ -14,7 +14,7 @@ class MappingFieldArray extends MappingField implements MappingFieldInterface
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed $value
      * @return mixed
      */
     public function unserializeField($value)

@@ -11,14 +11,13 @@ class Entity
      */
     protected $__oremName;
 
-
     /**
      * @var \Rizeway\OREM\Manager
      */
     protected $__oremManager;
 
     /**
-     * @param string $name
+     * @param  string $name
      * @return Entity
      */
     public function __setOremName($name)
@@ -29,7 +28,7 @@ class Entity
     }
 
     /**
-     * @param \Rizeway\OREM\Manager $manager
+     * @param  \Rizeway\OREM\Manager $manager
      * @return Entity
      */
     public function __setOremManager(Manager $manager)
@@ -40,13 +39,13 @@ class Entity
     }
 
     /**
-     * @param string $method
-     * @param array $args
+     * @param  string $method
+     * @param  array  $args
      * @return mixed
      */
     public function __call($method, $args)
     {
-        if(preg_match('/get([A-Z][a-zA-Z0-9_]*)/', $method, $matches)) {
+        if (preg_match('/get([A-Z][a-zA-Z0-9_]*)/', $method, $matches)) {
             $relation = strtolower($matches[1]);
             $primaryKey = $this->__oremManager->getMappingForObject($this)->getPrimaryKey();
 

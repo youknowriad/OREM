@@ -2,7 +2,6 @@
 
 namespace Rizeway\OREM;
 
-use Rizeway\OREM\Entity\EntityHelper;
 use Rizeway\OREM\Exception\ExceptionNotFound;
 use Rizeway\OREM\Repository\Repository;
 use Rizeway\OREM\Connection\ConnectionInterface;
@@ -43,7 +42,7 @@ class Manager
     protected $adapters;
 
     /**
-     * @param ConnectionInterface $connection
+     * @param ConnectionInterface                   $connection
      * @param \Rizeway\OREM\Mapping\MappingEntity[] $mappings
      */
     public function __construct(ConnectionInterface $connection, array $mappings)
@@ -58,7 +57,7 @@ class Manager
     }
 
     /**
-     * @param string $entityName
+     * @param  string     $entityName
      * @return Repository
      * @throws \Exception
      */
@@ -68,7 +67,7 @@ class Manager
             throw new \Exception('Unknown Entity : ' . $entityName);
         }
 
-        if(false === isset($this->repositories[$entityName])) {
+        if (false === isset($this->repositories[$entityName])) {
             $this->repositories[$entityName] = new Repository($this, $entityName);
         }
 
@@ -76,7 +75,7 @@ class Manager
     }
 
     /**
-     * @param string $entityName
+     * @param  string                        $entityName
      * @return \Rizeway\OREM\Adapter\Adapter
      * @throws \InvalidArgumentException
      */
@@ -84,7 +83,7 @@ class Manager
     {
         $mapping = $this->getMappingForEntity($entityName);
 
-        if(false === isset($this->adapters[$entityName])) {
+        if (false === isset($this->adapters[$entityName])) {
             $class = $mapping->getAdapter();
 
             if (false === is_subclass_of($class, '\\Rizeway\\OREM\\Adapter\\AdapterInterface')) {
@@ -95,7 +94,10 @@ class Manager
                 ));
             }
 
-            $this->adapters[$entityName] = new $class($this->getMappingForEntity($entityName));
+            $this->adapters[$entityName] = new $class();
+            $this->adapters[$entityName]->setMappingEntity($this->getMappingForEntity($entityName));
+            $this->adapters[$entityName]->setSerializer($this->serializer);
+            $this->adapters[$entityName]->setConnection($this->connection);
         }
 
         return $this->adapters[$entityName];
@@ -107,11 +109,8 @@ class Manager
     public function persist($object)
     {
         $mapping = $this->getMappingForObject($object);
-        $result = $this->connection->query(
-            ConnectionInterface::METHOD_POST,
-            $mapping->getResourceUrl(),
-            $this->serializer->serializeEntity($object, $mapping->getName())
-        );
+        $result = $this->getAdapter($mapping->getName())->persist($object);
+
         $this->serializer->updateEntity($object, $result, $mapping->getName());
     }
 
@@ -121,26 +120,21 @@ class Manager
     public function update($object)
     {
         $mapping = $this->getMappingForObject($object);
-        $helper = new EntityHelper($mapping);
-        $result = $this->connection->query(
-            ConnectionInterface::METHOD_PUT,
-            $mapping->getResourceUrl().'/'.$helper->getPrimaryKey($object),
-            $this->serializer->serializeEntity($object, $mapping->getName())
-        );
+        $result = $this->getAdapter($mapping->getName())->update($object);
 
         $this->serializer->updateEntity($object, $result, $mapping->getName());
     }
 
     /**
-     * @param string $entityName
-     * @param string[] $urlParameters
+     * @param  string     $entityName
+     * @param  string[]   $urlParameters
      * @return object[]
      * @throws \Exception
      */
     public function findQuery($entityName, array $urlParameters = array())
     {
         $mapping = $this->getMappingForEntity($entityName);
-        $results = $this->getAdapter($entityName)->findQuery($this->getConnection(), $urlParameters);
+        $results = $this->getAdapter($entityName)->findQuery($urlParameters);
 
         $entities = array();
         foreach ($results as $result) {
@@ -151,8 +145,8 @@ class Manager
     }
 
     /**
-     * @param string $entityName
-     * @param mixed $primaryKeyValue
+     * @param  string      $entityName
+     * @param  mixed       $primaryKeyValue
      * @return object|null
      * @throws \Exception
      */
@@ -161,19 +155,19 @@ class Manager
         $mapping = $this->getMappingForEntity($entityName);
 
         try {
-            $result = $this->getAdapter($entityName)->find($this->getConnection(), $primaryKeyValue);
+            $result = $this->getAdapter($entityName)->find($primaryKeyValue);
             $entity = $this->serializer->unserializeEntity($result, $mapping->getName());
 
             return $entity;
-        } catch(ExceptionNotFound $e) {
+        } catch (ExceptionNotFound $e) {
             return null;
         }
     }
 
     /**
-     * @param string $entityName
-     * @param mixed $primaryKeyValue
-     * @param string $relationName
+     * @param  string                    $entityName
+     * @param  mixed                     $primaryKeyValue
+     * @param  string                    $relationName
      * @return object|array
      * @throws \InvalidArgumentException
      */
@@ -181,13 +175,12 @@ class Manager
     {
         $mapping = $this->getMappingForEntity($entityName);
 
-        foreach($mapping->getHasOneMappings() as $relation) {
-            if($relation->getFieldName() !== $relationName || $relation->isLazy() === false) {
+        foreach ($mapping->getHasOneMappings() as $relation) {
+            if ($relation->getFieldName() !== $relationName || $relation->isLazy() === false) {
                 continue;
             }
 
             $result = $this->getAdapter($entityName)->findRelation(
-                $this->getConnection(),
                 $relation,
                 $primaryKeyValue,
                 $relationName
@@ -196,13 +189,12 @@ class Manager
             return $this->serializer->unserializeEntity($result, $relation->getEntityName());
         }
 
-        foreach($mapping->getHasManyMappings() as $relation) {
-            if($relation->getFieldName() !== $relationName || $relation->isLazy() === false) {
+        foreach ($mapping->getHasManyMappings() as $relation) {
+            if ($relation->getFieldName() !== $relationName || $relation->isLazy() === false) {
                 continue;
             }
 
             $results = $this->getAdapter($entityName)->findRelation(
-                $this->getConnection(),
                 $relation,
                 $primaryKeyValue,
                 $relationName
@@ -233,15 +225,13 @@ class Manager
     }
 
     /**
-     * @param object $object
+     * @param  object     $object
      * @throws \Exception
      */
     public function remove($object)
     {
         $mapping = $this->getMappingForObject($object);
-        $helper = new EntityHelper($mapping);
-        $this->connection->query(ConnectionInterface::METHOD_DELETE, $mapping->getResourceUrl().'/'.
-            $helper->getPrimaryKey($object));
+        $this->getAdapter($mapping->getName())->remove($object);
         $this->store->removeEntity($object);
     }
 
@@ -261,11 +251,11 @@ class Manager
         throw new \Exception('No Mapping Entity found for class : '. get_class($object));
     }
 
-	/**
-	 * @return Connection\ConnectionInterface
-	 */
-	public function getConnection()
-	{
-		return $this->connection;
-	}
+    /**
+     * @return Connection\ConnectionInterface
+     */
+    public function getConnection()
+    {
+        return $this->connection;
+    }
 }

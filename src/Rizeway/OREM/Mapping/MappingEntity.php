@@ -46,14 +46,14 @@ class MappingEntity
     protected $adapter;
 
     /**
-     * @param string $name
-     * @param string $classname
-     * @param string $primaryKey
-     * @param \Rizeway\OREM\Mapping\Field\MappingFieldInterface[] $fieldMappings
+     * @param string                                                    $name
+     * @param string                                                    $classname
+     * @param string                                                    $primaryKey
+     * @param \Rizeway\OREM\Mapping\Field\MappingFieldInterface[]       $fieldMappings
      * @param \Rizeway\OREM\Mapping\Relation\MappingRelationInterface[] $hasManyMappings
      * @param \Rizeway\OREM\Mapping\Relation\MappingRelationInterface[] $hasOneMappings
-     * @param string $url
-     * @param string $adapter
+     * @param string                                                    $url
+     * @param string                                                    $adapter
      */
     public function __construct($name, $classname, $primaryKey, $fieldMappings,
         $hasManyMappings = array(), $hasOneMappings = array(), $url = null, $adapter = null)
