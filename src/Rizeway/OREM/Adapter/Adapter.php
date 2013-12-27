@@ -36,7 +36,7 @@ class Adapter implements AdapterInterface {
         );
     }
 
-    public function findRelation(ConnectionInterface $connection, MappingRelationInterface $relation, $primaryKeyValue)
+    public function findRelation(ConnectionInterface $connection, MappingRelationInterface $relation, $primaryKeyValue, array $urlParameters = array())
     {
         if (is_null($this->mapping->getPrimaryKey())) {
             throw new \Exception('A field must be defined as primary key');
@@ -44,7 +44,9 @@ class Adapter implements AdapterInterface {
 
         return $connection->query(
             ConnectionInterface::METHOD_GET,
-            $this->mapping->getResourceUrl().'/'.$primaryKeyValue.'/'.$relation->getRemoteName()
+            $this->mapping->getResourceUrl().'/'.$primaryKeyValue.'/'.$relation->getRemoteName(),
+            null,
+            $urlParameters
         );
     }
 }

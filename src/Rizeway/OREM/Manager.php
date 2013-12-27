@@ -174,10 +174,11 @@ class Manager
      * @param string $entityName
      * @param mixed $primaryKeyValue
      * @param string $relationName
+     * @param array $urlParameters
      * @return object|array
      * @throws \InvalidArgumentException
      */
-    public function findRelation($entityName, $primaryKeyValue, $relationName)
+    public function findRelation($entityName, $primaryKeyValue, $relationName, array $urlParameters = array())
     {
         $mapping = $this->getMappingForEntity($entityName);
 
@@ -190,7 +191,7 @@ class Manager
                 $this->getConnection(),
                 $relation,
                 $primaryKeyValue,
-                $relationName
+                $urlParameters
             );
 
             return $this->serializer->unserializeEntity($result, $relation->getEntityName());
@@ -205,7 +206,7 @@ class Manager
                 $this->getConnection(),
                 $relation,
                 $primaryKeyValue,
-                $relationName
+                $urlParameters
             );
             $entities = array();
             foreach ($results as $result) {

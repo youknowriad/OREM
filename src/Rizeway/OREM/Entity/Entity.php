@@ -52,7 +52,8 @@ class Entity
 
             $this->$relation = $this->__oremManager->getRepository($this->__oremName)->findRelation(
                 $this->$primaryKey,
-                $relation
+                $relation,
+                count($args) ? $args[0] : array()
             );
 
             return $this->$relation;
