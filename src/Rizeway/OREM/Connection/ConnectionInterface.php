@@ -25,7 +25,8 @@ interface ConnectionInterface
      * @param string $method
      * @param string $resource
      * @param array  $content
+     * @param array  $urlParameters
      * @return array|bool|float|int|string
      */
-    public function query($method, $resource, $content = null);
+    public function query($method, $resource, $content = null, array $urlParameters = array());
 }
