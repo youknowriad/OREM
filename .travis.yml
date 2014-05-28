@@ -4,4 +4,4 @@ php:
 before_script:
   - wget http://getcomposer.org/composer.phar
   - php composer.phar install --dev
-script: ./bin/atoum --test-all
+script: ./bin/atoum

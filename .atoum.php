@@ -11,7 +11,7 @@ if(false === is_dir(COVERAGE_DIRECTORY)) {
 
 $coverageField = new atoum\report\fields\runner\coverage\html(COVERAGE_TITLE, COVERAGE_DIRECTORY);
 
-$script->addTestAllDirectory(TESTS_ROOT);
+$runner->addTestsFromDirectory(TESTS_ROOT);
 $runner->setBootstrapFile(TESTS_ROOT . '/../bootstrap.php');
 $cliReport = $script->addDefaultReport();
 $cliReport->addField($coverageField);
