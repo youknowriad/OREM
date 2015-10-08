@@ -2,7 +2,9 @@
 
 namespace test\unit\Rizeway\OREM;
 
-use Rizeway\OREM\Exception\ExceptionNotFound;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use Rizeway\OREM\Mapping\Relation\MappingRelationHasMany;
 use Rizeway\OREM\Mapping\Relation\MappingRelationHasOne;
 use Rizeway\OREM\Entity\Entity;
@@ -177,7 +179,7 @@ class Manager extends atoum\test
                     ->once()
                 ->object($entity)->isInstanceOf('\test\unit\Rizeway\OREM\MyEntity')
                 ->string($entity->test)->isEqualTo('id')
-            ->if($connection->getMockController()->query->throw = new ExceptionNotFound('test', 404))
+            ->if($connection->getMockController()->query->throw = $exception = new ClientException('test', new Request('get', ''), new Response(404)))
             ->then
                 ->variable($object->find('entity', 'id'))->isNull()
 

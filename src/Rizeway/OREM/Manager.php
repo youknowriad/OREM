@@ -2,13 +2,12 @@
 
 namespace Rizeway\OREM;
 
+use GuzzleHttp\Exception\ClientException;
 use Rizeway\OREM\Entity\EntityHelper;
-use Rizeway\OREM\Exception\ExceptionNotFound;
 use Rizeway\OREM\Repository\Repository;
 use Rizeway\OREM\Connection\ConnectionInterface;
 use Rizeway\OREM\Serializer\Serializer;
 use Rizeway\OREM\Store\Store;
-use Rizeway\OREM\Adapter\Adapter;
 
 class Manager
 {
@@ -165,8 +164,12 @@ class Manager
             $entity = $this->serializer->unserializeEntity($result, $mapping->getName());
 
             return $entity;
-        } catch(ExceptionNotFound $e) {
-            return null;
+        } catch(ClientException $e) {
+            if ($e->getResponse()->getStatusCode() === 404) {
+                return null;
+            }
+
+            throw $e;
         }
     }
 

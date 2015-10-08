@@ -2,7 +2,7 @@
 
 namespace Rizeway\OREM\Connection;
 
-use Guzzle\Http\ClientInterface;
+use GuzzleHttp\ClientInterface;
 
 interface ConnectionInterface
 {

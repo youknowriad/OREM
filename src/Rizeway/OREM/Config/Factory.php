@@ -2,11 +2,9 @@
 
 namespace Rizeway\OREM\Config;
 
-use Guzzle\Common\Event;
+use GuzzleHttp\Client;
 use Rizeway\OREM\Connection\Connection;
-use Rizeway\OREM\Exception\ExceptionNotFound;
 use Rizeway\OREM\Manager;
-use Guzzle\Service\Client;
 
 class Factory
 {
@@ -35,15 +33,9 @@ class Factory
      */
     public function getConnection()
     {
-        $client = new Client($this->url);
-        $client->getEventDispatcher()->addListener('request.error', function(Event $event) {
-            if ($event['response']->getStatusCode() == 404) {
-                $event->stopPropagation();
-                throw new ExceptionNotFound($event['response']->getMessage(), $event['response']->getStatusCode());
-            }
-        });
-
-        return new Connection($client);
+        return new Connection(new Client([
+            'base_uri' => $this->url
+        ]));
     }
 
     /**

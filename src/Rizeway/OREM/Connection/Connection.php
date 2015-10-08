@@ -2,12 +2,13 @@
 
 namespace Rizeway\OREM\Connection;
 
-use Guzzle\Http\ClientInterface;
+
+use GuzzleHttp\ClientInterface;
 
 class Connection implements ConnectionInterface
 {
     /**
-     * @var \Guzzle\Service\Client
+     * @var ClientInterface
      */
     protected $client;
 
@@ -20,7 +21,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @return \Guzzle\Http\ClientInterface
+     * @return ClientInterface
      */
     public function getClient()
     {
@@ -28,7 +29,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param \Guzzle\Http\ClientInterface $client
+     * @param ClientInterface $client
      */
     public function setClient(ClientInterface $client)
     {
@@ -44,11 +45,12 @@ class Connection implements ConnectionInterface
      */
     public function query($method, $resource, $content = null, array $urlParameters = array())
     {
-        $request = $this->client->createRequest($method, $resource . $this->getQueryUrl($urlParameters), array(
-            'Content-Type' => 'application/json'
-        ), is_null($content) ? null : json_encode($content));
+        $response = $this->client->request($method, $resource . $this->getQueryUrl($urlParameters), [
+            'headers' => ['Content-Type' => 'application/json'],
+            'body' => is_null($content) ? '' : json_encode($content)
+        ]);
 
-        return $request->send()->json();
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**

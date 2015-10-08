@@ -26,9 +26,6 @@ class Factory extends atoum\test
                 ->object($connection = $object->getConnection())->isInstanceOf('Rizeway\\OREM\\Connection\\ConnectionInterface')
                 ->array($object->getEntityMappings())->isEqualTo(array())
                 ->object($object->getManager())->isInstanceOf('Rizeway\\OREM\\Manager')
-                ->exception(function() use($connection) {
-                    $connection->getClient()->getEventDispatcher()->dispatch('request.error', new Event(array('response' => new Response(404))));
-                })->hasMessage("HTTP/1.1 404 Not Found\r\n\r\n")
         ;
     }
 

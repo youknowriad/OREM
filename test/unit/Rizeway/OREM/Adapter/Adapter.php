@@ -3,12 +3,13 @@
 namespace test\unit\Rizeway\OREM\Adapter;
 
 use atoum;
-use Rizeway\OREM\Exception\ExceptionNotFound;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use Rizeway\OREM\Mapping\Relation\MappingRelationHasMany;
 use Rizeway\OREM\Mapping\Relation\MappingRelationHasOne;
 use Rizeway\OREM\Mapping\Field\MappingFieldString;
 use Rizeway\OREM\Mapping\MappingEntity;
-use Rizeway\OREM\Connection\ConnectionInterface;
 use Rizeway\OREM\Adapter\Adapter as TestedClass;
 
 class Adapter extends atoum
@@ -83,7 +84,7 @@ class Adapter extends atoum
                 ->mock($connection)
                     ->call('query')->withArguments('GET', 'entity/id', array())->once()
 
-            ->if($connection->getMockController()->query->throw = $exception = new ExceptionNotFound('test', 404))
+            ->if($connection->getMockController()->query->throw = $exception = new ClientException('test', new Request('get', ''), new Response(404)))
             ->then
                 ->exception(function() use ($object, $connection) { $object->find($connection, 'id'); })->isIdenticalTo($exception)
             ->if($mapping = new MappingEntity('entity', '\test\unit\Rizeway\OREM\MyEntity', null, array('test' => $mappingField), array()))
