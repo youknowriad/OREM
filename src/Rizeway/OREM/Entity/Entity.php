@@ -59,4 +59,13 @@ class Entity
             return $this->$relation;
         }
     }
+
+    public function refresh() {
+        $this->__oremManager->find(
+            $this->__oremName,
+            $this->__oremManager->getMappingForObject($this)->getPrimaryKey()
+        );
+
+        return $this;
+    }
 }
